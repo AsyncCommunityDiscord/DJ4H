@@ -1,8 +1,22 @@
+import discord
 from discord.commands import slash_command
 from discord.ext import commands
 
 from config import LOGGER
 from utils.database.dao.users import UserDao
+
+
+def get_medal_emoji(position: int) -> str:
+    """Get the medal emoji based on the user's position."""
+    match position:
+        case 1:
+            return "🥇"
+        case 2:
+            return "🥈"
+        case 3:
+            return "🥉"
+        case _:
+            return f"#{position}"
 
 
 class Game(commands.Cog):
@@ -25,10 +39,16 @@ class Game(commands.Cog):
             return
 
         leaderboard_text = "\n".join(
-            f"#{i + 1}. <@{user.user_id}> - {user.score}"
+            f"{get_medal_emoji(i + 1)} <@{user.user_id}> - {user.score}"
             for i, user in enumerate(leaderboard)
         )
-        await ctx.respond(f"**Leaderboard:**\n{leaderboard_text}")
+        embed = discord.Embed(
+            title="Leaderboard",
+            color=discord.Color.green(),
+            description=leaderboard_text,
+        )
+
+        await ctx.respond(embed=embed)
 
     @slash_command()
     async def score(self, ctx) -> None:
