@@ -3,7 +3,6 @@ from discord.commands import slash_command
 from discord.ext import commands
 
 from config import LOGGER
-from utils.database import get_db
 from utils.database.dao.guilds import GuildsDao
 
 
@@ -27,7 +26,6 @@ class Configuration(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.db = next(get_db())
 
     @slash_command()
     async def config(
@@ -45,7 +43,7 @@ class Configuration(commands.Cog):
             return
 
         converted_time = convert_time_to_seconds(delay)
-        guilds_dao = GuildsDao(self.db)
+        guilds_dao = GuildsDao()
 
         if guilds_dao.get_guild(ctx.guild.id) is None:
             guilds_dao.add_guild(ctx.guild.id, channel.id, converted_time)
@@ -55,6 +53,7 @@ class Configuration(commands.Cog):
             LOGGER.info(
                 f"Guild {ctx.guild.id} configured with channel {channel.id} and delay {converted_time} seconds."
             )
+            return
 
         guilds_dao.update_guild(ctx.guild.id, channel.id, converted_time)
         await ctx.respond(
