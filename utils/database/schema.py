@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer
-from sqlalchemy.sql.schema import PrimaryKeyConstraint
+from sqlalchemy import BigInteger, Column
 
 from .connection import Base
 
@@ -7,8 +6,6 @@ from .connection import Base
 class Guild(Base):
     __tablename__ = "guilds"
 
-    id = Column(Integer, autoincrement=True)
-    guild_id = Column(Integer, unique=True, nullable=False)
-    channel_id = Column(Integer, nullable=False)
-
-    __table_args__ = (PrimaryKeyConstraint("guild_id", "channel_id"),)
+    guild_id = Column(BigInteger, primary_key=True, unique=True, nullable=False)
+    channel_id = Column(BigInteger, primary_key=True, nullable=False)
+    delay_second = Column(BigInteger, nullable=False)
