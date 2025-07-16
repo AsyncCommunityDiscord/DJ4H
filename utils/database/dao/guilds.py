@@ -1,11 +1,9 @@
-from sqlalchemy.orm import Session
-
-from utils.database import Guild
+from utils.database import Guild, get_db
 
 
 class GuildsDao:
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self):
+        self.db = next(get_db())
 
     def add_guild(
         self, guild_id: int, channel_id: int, delay_second: int
