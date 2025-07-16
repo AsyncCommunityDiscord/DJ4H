@@ -19,7 +19,7 @@ def convert_time_to_seconds(time_str: str) -> int:
         case "d":
             return int(time_str[:-1]) * 24 * 60 * 60
         case _:
-            raise ValueError("Invalid time format. Use 'm', 'h', or 'd'.")
+            raise ValueError("Invalid time format: Use 'm', 'h', or 'd'.")
 
 
 class Configuration(commands.Cog):
@@ -43,8 +43,12 @@ class Configuration(commands.Cog):
         if not ctx.guild:
             await ctx.respond("This command can only be used in a server.")
             return
+        try:
+            converted_time = convert_time_to_seconds(delay)
+        except ValueError as e:
+            await ctx.respond(e)
+            return
 
-        converted_time = convert_time_to_seconds(delay)
         guilds_dao = GuildsDao()
 
         if guilds_dao.get_guild(ctx.guild.id) is None:
