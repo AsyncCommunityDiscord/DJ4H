@@ -28,6 +28,7 @@ class Configuration(commands.Cog):
         self.bot = bot
 
     @slash_command()
+    @discord.default_permissions()
     async def config(
         self,
         ctx,
