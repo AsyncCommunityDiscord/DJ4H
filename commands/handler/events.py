@@ -41,6 +41,12 @@ class EventHandler(commands.Cog):
                 f"Added message {ctx.id} to {ctx.guild.name} at {current_time}"
             )
             return
+        if last_message.author_id == ctx.author.id:
+            # Last message was sent by the same user
+            LOGGER.debug(
+                f"Last message {last_message.message_id} was sent by the same user in {ctx.guild.name}"
+            )
+            return
 
         # User has won a point
         if last_message.timestamp + guild.delay_second <= current_time:
