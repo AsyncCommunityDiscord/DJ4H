@@ -30,6 +30,21 @@ class Game(commands.Cog):
         )
         await ctx.respond(f"**Leaderboard:**\n{leaderboard_text}")
 
+    @slash_command()
+    async def score(self, ctx) -> None:
+        """Check your score."""
+        if not ctx.guild:
+            return
+
+        user_dao = UserDao()
+        user = user_dao.get_user(ctx.author.id, ctx.guild.id)
+
+        if user is None:
+            await ctx.respond("You have no score in this guild.")
+            return
+
+        await ctx.respond(f"Your score: {user.score}")
+
 
 def setup(bot: commands.Bot) -> None:
     """Load the Game cog."""
