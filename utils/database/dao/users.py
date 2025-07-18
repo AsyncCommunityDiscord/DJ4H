@@ -35,3 +35,12 @@ class UserDao:
             .limit(limit)
             .all()
         )
+
+    def get_rank(self, user_id: int, guild_id: int) -> int:
+        """Get the rank of a user in a specific guild."""
+        users = self.get_leaderboard(guild_id, limit=None)
+        sorted_users = sorted(users, key=lambda x: x.score, reverse=True)
+        for index, user in enumerate(sorted_users):
+            if user.user_id == user_id:
+                return index + 1
+        return -1

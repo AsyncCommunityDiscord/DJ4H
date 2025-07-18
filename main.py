@@ -1,6 +1,6 @@
 import discord
 
-from config import BOT_TOKEN, DEBUG_GUILD_ID, setup_logging
+from config import BOT_TOKEN, DEBUG_GUILD_ID, LOGGER, setup_logging
 from utils.database.connection import Base, engine
 
 setup_logging()
@@ -11,6 +11,12 @@ bot = discord.Bot(
     activity=discord.Game(name="Type /help for commands"),
     debug_guilds=[DEBUG_GUILD_ID] if DEBUG_GUILD_ID else None,
 )
+
+
+@bot.event
+async def on_ready():
+    LOGGER.info(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
+    LOGGER.info("------")
 
 
 Base.metadata.create_all(engine)
