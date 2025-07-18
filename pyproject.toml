@@ -3,7 +3,7 @@ name = "dj4h"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Gamingdy"}
+    { name = "Gamingdy" }
 ]
 readme = "README.md"
 requires-python = ">=3.10"

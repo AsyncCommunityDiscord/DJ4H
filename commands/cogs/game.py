@@ -81,7 +81,13 @@ class Game(commands.Cog):
             await ctx.respond("You have no score in this guild.")
             return
 
-        await ctx.respond(f"Your score: {user.score}")
+        embed = discord.Embed(
+            title="🎪 Le jeu des 4h",
+            description=f"Votre score est **{user.score}**",
+            colour=discord.Colour(5220337),
+        )
+
+        await ctx.respond(embed=embed)
 
 
 def setup(bot: discord.Bot) -> None:

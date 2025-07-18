@@ -94,7 +94,7 @@ class LeaderboardGenerator:
         )
 
         # Header Text (Adjust positions and fonts)
-        headers = ["Rank", "Username", "Score"]
+        headers = ["Rang", "Pseudo", "Score"]
         # Column widths are still conceptual for text placement
         # col_widths = [100, 450, 100]
         x_offsets = [15, 190, 680]  # Starting X positions for text

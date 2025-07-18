@@ -8,7 +8,6 @@ setup_logging()
 bot = discord.Bot(
     intents=discord.Intents.default(),
     help_command=None,  # Disable the default help command
-    activity=discord.Game(name="Type /help for commands"),
     debug_guilds=[DEBUG_GUILD_ID] if DEBUG_GUILD_ID else None,
 )
 
