@@ -36,6 +36,7 @@ class UserDao:
             .all()
         )
 
+    # TODO: Implement a method to get with sqlalchemy the rank of a user in a specific guild
     def get_rank(self, user_id: int, guild_id: int) -> int:
         """Get the rank of a user in a specific guild."""
         users = self.get_leaderboard(guild_id, limit=None)
