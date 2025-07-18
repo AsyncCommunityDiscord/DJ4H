@@ -30,6 +30,7 @@ def setup_logging():
 
     current_path = pathlib.Path(__file__).parent.resolve()
     config_file = pathlib.Path(f"{current_path}/log_config.json")
+    os.makedirs("logs", exist_ok=True)
     with open(config_file) as f_in:
         config = json.load(f_in)
 
