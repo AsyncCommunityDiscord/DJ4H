@@ -29,9 +29,7 @@ class LeaderboardGenerator:
     ROW_ODD_COLOR = (45, 45, 45)  # Odd row background
     HIGHLIGHT_COLOR = (0, 100, 200)  # For "async" button
 
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         """
         Initializes the Leaderboard Generator.
         """
@@ -202,7 +200,7 @@ class LeaderboardGenerator:
                     avatar_img, avatar_size, avatar_x, avatar_y, img
                 )
             except Exception:
-                # Si l'avatar n'est pas disponible, afficher un cercle gris par défaut
+                # If the profile picture isn't available, displays a gray circle
                 default_avatar = Image.new(
                     "RGBA", (avatar_size, avatar_size), (120, 120, 120, 255)
                 )
