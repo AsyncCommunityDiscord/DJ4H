@@ -85,6 +85,6 @@ class EventHandler(commands.Cog):
 
 
 def setup(bot):
-    """Setup the event handler."""
+    """Set up the event handler."""
     bot.add_cog(EventHandler(bot))
     LOGGER.info("Event handler loaded")
