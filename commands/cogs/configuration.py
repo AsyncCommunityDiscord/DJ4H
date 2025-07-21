@@ -51,10 +51,8 @@ class Configuration(commands.Cog):
             await ctx.respond(e)
             return
 
-        guilds_dao = GuildsDao()
-
-        if guilds_dao.get_guild(ctx.guild.id) is None:
-            guilds_dao.add_guild(ctx.guild.id, channel.id, converted_time)
+        if await GuildsDao.get_guild(ctx.guild.id) is None:
+            await GuildsDao.add_guild(ctx.guild.id, channel.id, converted_time)
             await ctx.respond(
                 f"Configuration setup: Channel: {channel.mention}, Delay: {delay}."
             )
@@ -63,7 +61,7 @@ class Configuration(commands.Cog):
             )
             return
 
-        guilds_dao.update_guild(ctx.guild.id, channel.id, converted_time)
+        await GuildsDao.update_guild(ctx.guild.id, channel.id, converted_time)
         await ctx.respond(
             f"Configuration updated: Channel: {channel.mention}, Delay: {delay}."
         )
@@ -79,17 +77,16 @@ class Configuration(commands.Cog):
             await ctx.respond("This command can only be used in a server.")
             return
 
-        user_dao = UserDao()
-        user = user_dao.get_user(member.id, ctx.guild.id)
+        user = await UserDao.get_user(member.id, ctx.guild.id)
 
         if user is None:
-            user_dao.add_user(member.id, ctx.guild.id, score)
+            await UserDao.add_user(member.id, ctx.guild.id, score)
             await ctx.respond(f"Set user {member.mention}'s score to {score}.")
             LOGGER.info(
                 f"User {member.id} added to guild {ctx.guild.id} with score {score}."
             )
         else:
-            user_dao.update_user(member.id, ctx.guild.id, score)
+            await UserDao.update_user(member.id, ctx.guild.id, score)
             await ctx.respond(
                 f"User {member.mention}'s score updated to {score}."
             )

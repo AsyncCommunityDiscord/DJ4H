@@ -1,7 +1,7 @@
 import discord
 
 from config import BOT_TOKEN, DEBUG_GUILD_ID, LOGGER, setup_logging
-from utils.database.connection import Base, engine
+from utils.database import init_db
 
 setup_logging()
 
@@ -16,8 +16,10 @@ bot = discord.AutoShardedBot(
 async def on_ready():
     LOGGER.info(f"Logged in as {bot.user.name} (ID: {bot.user.id})")
     LOGGER.info("------")
+    await init_db()
+    LOGGER.info("Database initialized successfully.")
+    LOGGER.info("------")
 
 
-Base.metadata.create_all(engine)
 bot.load_extensions("commands", recursive=True)
 bot.run(BOT_TOKEN)

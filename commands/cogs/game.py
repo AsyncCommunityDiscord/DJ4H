@@ -32,14 +32,13 @@ class Game(commands.Cog):
 
     async def get_user_data(self, users: list[type[User]]):
         users_response = []
-        user_dao = UserDao()
         for user in users:
             user_data = await self.bot.get_or_fetch_user(user.user_id)
             if user_data:
                 user_ = LeaderboardUser()
                 user_.user = user_data
                 user_.score = user.score
-                user_.rank = user_dao.get_rank(user.user_id, user.guild_id)
+                user_.rank = await UserDao.get_rank(user.user_id, user.guild_id)
                 users_response.append(user_)
         return users_response
 
@@ -50,8 +49,7 @@ class Game(commands.Cog):
         if not ctx.guild:
             return
 
-        user_dao = UserDao()
-        leaderboard = user_dao.get_leaderboard(ctx.guild.id, 10)
+        leaderboard = await UserDao.get_leaderboard(ctx.guild.id, 10)
 
         if not leaderboard:
             await ctx.respond("No users found in the leaderboard.")
@@ -75,8 +73,7 @@ class Game(commands.Cog):
         if not ctx.guild:
             return
 
-        user_dao = UserDao()
-        user = user_dao.get_user(ctx.author.id, ctx.guild.id)
+        user = await UserDao.get_user(ctx.author.id, ctx.guild.id)
 
         if user is None:
             await ctx.respond("You have no score in this guild.")

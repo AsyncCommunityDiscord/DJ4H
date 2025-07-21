@@ -29,9 +29,7 @@ class LeaderboardGenerator:
     ROW_ODD_COLOR = (45, 45, 45)  # Odd row background
     HIGHLIGHT_COLOR = (0, 100, 200)  # For "async" button
 
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         """
         Initializes the Leaderboard Generator.
         """

@@ -1,12 +1,22 @@
-from typing import Any, Generator
-from sqlalchemy.orm import Session
-from .connection import SessionLocal
+from typing import AsyncIterator
+
+from sqlalchemy.ext.asyncio.session import AsyncSession
+
+from .connection import engine, session_local
 from .schema import *
 
 
-def get_db()-> Generator[Session, Any, None]:
-    db = SessionLocal()
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+async def get_db() -> AsyncIterator[AsyncSession]:
+    session = session_local()
     try:
-        yield db
+        yield session
+    except Exception:
+        await session.rollback()
+        raise
     finally:
-        db.close()
+        await session.close()

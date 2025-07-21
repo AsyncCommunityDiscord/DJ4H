@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column
+from sqlalchemy import BigInteger, Column, String
 
 from .connection import Base
 
@@ -15,7 +15,7 @@ class Message(Base):
     __tablename__ = "messages"
 
     message_id = Column(
-        BigInteger, primary_key=True, unique=True, nullable=False
+        String(20), primary_key=True, unique=True, nullable=False
     )
     guild_id = Column(BigInteger, nullable=False)
     author_id = Column(BigInteger, nullable=False)
