@@ -10,6 +10,7 @@ from config import (
     DATABASE_USER,
 )
 
+
 Base = declarative_base()
 
 SQLALCHEMY_DATABASE_URL = f"mariadb+mariadbconnector://{DATABASE_USER}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}"
