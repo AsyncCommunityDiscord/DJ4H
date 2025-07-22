@@ -3,6 +3,7 @@ import discord
 from config import BOT_TOKEN, DEBUG_GUILD_ID, LOGGER, setup_logging
 from utils.database import init_db
 
+
 setup_logging()
 
 bot = discord.AutoShardedBot(
