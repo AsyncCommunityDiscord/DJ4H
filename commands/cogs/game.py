@@ -12,15 +12,13 @@ from utils.image_generator import LeaderboardGenerator, LeaderboardUser
 
 def get_medal_emoji(position: int) -> str:
     """Get the medal emoji based on the user's position."""
-    match position:
-        case 1:
-            return "🥇"
-        case 2:
-            return "🥈"
-        case 3:
-            return "🥉"
-        case _:
-            return f"#{position}"
+    icons: dict[int, str] = {
+        1: "🥇",
+        2: "🥈",
+        3: "🥉"
+    }
+
+    return icons.get(position, f"#{position}")
 
 
 class Game(commands.Cog):
