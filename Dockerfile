@@ -4,7 +4,7 @@ FROM python:3.10-slim
 RUN apt update && apt upgrade -y
 
 # Install the required packages
-RUN apt install -y --no-install-recommends gcc libmariadb-dev libmariadb3 && apt clean
+RUN apt install -y --no-install-recommends gcc && apt clean
 
 # Install poetry
 RUN pip install poetry==2.1.3
