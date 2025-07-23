@@ -1,155 +1,165 @@
-# DJ4H - Discord Bot
+<h3 align="center">
+  <img src="https://avatars.githubusercontent.com/u/78621926?s=200&v=4" width="75"><br/>
+  DJ4H <br/>
+  This project is under the <a href="https://choosealicense.com/licenses/gpl-3.0/">GNU GPL v3</a> license<br/><br/>
+</h3>
 
-## Description
+# <p align="center">`DJ4H`</p>
 
-DJ4H est un bot Discord conçu pour le "Jeu des 4 heures" du serveur Async - Community 
-(anciennement Graven - Développement). Son objectif premier est de permetttre le compte automatique des points.
+This is a personal project for a multi-purpose Discord bot.
 
-Bien que conçu pour le serveur Async - Community, le bot peut être utilisé sur d'autres serveurs et fonctionner sur 
-plusieurs serveurs simultanément.
+---
 
-DJ4H est un bot Discord qui implémente un jeu de timing compétitif appelé "Le jeu des 4h". Les joueurs s'affrontent en envoyant des messages dans un canal désigné après qu'une période de délai configurable soit écoulée depuis le dernier message.
+## Global information
 
-## Fonctionnalités
+| Global information |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Description        | DJ4H is a multi-purpose Discord bot designed to enhance server engagement. It includes features for games, activity tracking, and server management, providing a dynamic and interactive experience for communities.                                                                                                                                                                                                                                                                                                                                          |
+| Collaborators      | <img src="https://avatars.githubusercontent.com/u/73261020?v=4" alt="drawing" width="25"/> [Gamingdy](https://github.com/Gamingdy),  <img src="https://avatars.githubusercontent.com/u/34105327?s=64&v=4" alt="drawing" width="25"/> [Lindwen](https://github.com/Lindwen), <img src="https://avatars.githubusercontent.com/u/1571189?s=64&v=4" alt="drawing" width="25"/> [Loïc R](https://github.com/Lramelot),  <img src="https://avatars.githubusercontent.com/u/69684024?s=64&v=4" alt="drawing" width="25"/> [GabHas](https://github.com/TheRealGabHas) |
+| Version            | 1.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-Ce bot supporte les fonctionnalités suivantes :
-- Comptage automatique des points
-- Génération d'une image du classement
-- Gestion des points des joueurs (définir/ consulter les scores)
+---
 
+## State
 
-## Commandes
+![](https://img.shields.io/badge/State-In_production-green?style=for-the-badge)
 
-Les paramètres de commandes obligatoires sont indiqués entre crochets (`[obligatoire]`) 
-tandis que les paramètres optionnels sont placés entre parenthèses (`(optionnel)`).
+<!-- Replace with your repository URL -->
+![](https://img.shields.io/github/issues/AsyncCommunityDiscord/DJ4H?style=for-the-badge)
 
+<!-- Replace with your repository URL -->
+![](https://img.shields.io/github/issues-pr/AsyncCommunityDiscord/DJ4H?style=for-the-badge)
 
-### Configuration
+---
 
-Les commandes de cette section concernent la configuration du jeu et sont réservées 
-aux utilisateurs ayant assez de privilèges.
+## About The Project
 
-- `/config [channel: discord.TextChannel] [delay]`: Définir le canal dans lequel le jeu prend place ainsi que le délai requis pour gagner un point
-  - Exemple : `/config jeu-des-4-heures 4h` : Le jeu aura lieu dans le canal `#jeu-des-4-heures` avec un délai de `4 heures`. Les préfixes de temps sont les suivants :
-    - `s`: Seconde
-    - `m`: Minute
-    - `h`: Heure
-    - `d`: Jour
-- `/set [member: discord.Member] [score: int]`: Définir le score d'un membre à la valeur `score`
-  - Exemple : `/set gamingdy 4`: Le score de `@gamingdy` est désormais de `4`
-- `/dump_log`: Obtenir le fichier de journaux du bot
+DJ4H is a Discord bot designed for the "4-hour Game" on the Async - Community server (formerly Graven - Développement).
+Its primary purpose is to automate point counting.
 
+Although designed for the Async - Community server, the bot can be used on other servers and can run on multiple servers
+simultaneously.
 
-### Joueur
+DJ4H implements a competitive timing game called "The 4h Game". Players compete by sending messages in a designated
+channel after a configurable delay period has passed since the last message.
 
-Les commandes de cette section concernent les participants au jeu.
+## Features
 
-- `/leaderboard`: Obtenir une image avec le classement des 10 membres avec le plus de points
-- `/score`: Obtenir son propre score
+- Automatic point counting
+- Leaderboard image generation
+- Player point management (set/view scores)
 
+## Commands
 
-### Règles du jeu
+Required command parameters are shown in brackets (`[required]`) while optional parameters are in parentheses (
+`(optional)`).
 
-1. Configurez un canal de jeu avec la commande appropriée
-2. Les joueurs envoient des messages dans le canal
-3. Un point est attribué au joueur précédent si le délai configuré s'est écoulé
-4. Les scores sont suivis et affichés dans le leaderboard
+### Configuration (Admin only)
 
+| Command | Description |
+| --- | --- |
+| `/config [channel] [delay]` | Sets the game channel and the required delay to score a point. Time prefixes: `s` (seconds), `m` (minutes), `h` (hours), `d` (days). |
+| `/set [member] [score]` | Sets a member's score to the specified value. |
+| `/dump_log` | Retrieves the bot's log file. |
+
+### Player
+
+| Command | Description |
+| --- | --- |
+| `/leaderboard` | Displays an image with the top 10 players. |
+| `/score` | Shows your own score. |
 
 ## Installation
 
-### Prérequis
+### Prerequisites
 
 - Python 3.9+
-- Poetry (pour la gestion des dépendances)
+- Poetry (for dependency management)
 
-### Installation des dépendances
+### Steps
 
-```bash
-# Cloner le repository
-git clone <repository-url>
-cd DJ4H
-
-# Installer les dépendances avec Poetry
-poetry install
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AsyncCommunityDiscord/DJ4H.git
+   cd DJ4H
+   ```
+2. Install dependencies with Poetry:
+   ```bash
+   poetry install
+   ```
 
 ## Configuration
 
-### Variables d'environnement
-
-Créez un fichier `.env` à la racine du projet avec les variables suivantes :
+Create a `.env` file in the project root with the following variables:
 
 ```env
-BOT_TOKEN=votre_token_discord_bot
-DEBUG_GUILD_ID=id_du_serveur_de_dev  # Optionnel
-DATABASE_PATH=dj4h.db  # Optionnel, par défaut dj4h.db
+BOT_TOKEN=your_discord_bot_token
+DEBUG_GUILD_ID=your_dev_server_id  # Optional
+DATABASE_PATH=dj4h.db              # Optional, defaults to dj4h.db
 ```
 
-- `BOT_TOKEN` : Token de votre bot Discord (requis)
-- `DEBUG_GUILD_ID` : ID du serveur Discord pour le développement (optionnel)
-- `DATABASE_PATH` : Chemin vers le fichier de base de données SQLite (optionnel)
+- `BOT_TOKEN`: Your Discord bot token (required).
+- `DEBUG_GUILD_ID`: Discord server ID for development (optional).
+- `DATABASE_PATH`: Path to the SQLite database file (optional).
 
-## Lancement
+## Usage
 
-### Mode développement
+### Development Mode
 
 ```bash
-# Lancer le bot
+# Run the bot
 poetry run python main.py
 ```
 
-### Mode production avec Docker
+### Production Mode with Docker
 
 ```bash
-# Build et lancement avec Docker Compose
+# Build and run with Docker Compose
 docker-compose -f compose-prod.yml up -d
 ```
 
-### Mode développement avec Docker
+### Development Mode with Docker
 
 ```bash
-# Build et lancement avec Docker Compose
+# Build and run with Docker Compose
 docker-compose up -d
 ```
 
+## Development
 
-## Développement
-
-### Formatage du code
+### Code Formatting
 
 ```bash
-# Formater le code avec Black
+# Format code with Black
 poetry run black .
 ```
 
-### Structure du projet
+### Project Structure
 
 ```
 DJ4H/
-├── main.py                    # Point d'entrée
-├── config.py                  # Configuration et logging
-├── commands/                  # Commandes Discord
-│   ├── cogs/game.py          # Commandes /leaderboard et /score
-│   └── handler/events.py     # Logique principale du jeu
+├── main.py                    # Entry point
+├── config.py                  # Configuration and logging
+├── commands/                  # Discord commands
+│   ├── cogs/game.py          # /leaderboard and /score commands
+��   └── handler/events.py     # Main game logic
 ├── utils/
-│   ├── database/             # Couche base de données
-│   │   ├── connection.py     # Connexion SQLite
-│   │   ├── schema.py         # Modèles de données
-│   │   └── dao/              # Objets d'accès aux données
-│   └── image_generator.py    # Génération d'images pour leaderboard
-└── docker/                   # Configuration Docker
+│   ├── database/             # Database layer
+│   │   ├── connection.py     # SQLite connection
+│   │   ├── schema.py         # Data models
+│   │   └── dao/              # Data Access Objects
+│   └── image_generator.py    # Image generation for leaderboard
+└── docker/                   # Docker configuration
 ```
 
+## Database
 
-## Base de données
+The bot uses SQLite with three main tables:
 
-Le bot utilise SQLite avec trois tables principales :
-- `guilds` : Configuration des serveurs (channel, délai)
-- `users` : Scores des utilisateurs par serveur
-- `messages` : Suivi des messages pour la logique du jeu
-
+- `guilds`: Server configuration (channel, delay).
+- `users`: User scores per server.
+- `messages`: Message tracking for game logic.
 
 ## Support
 
-Pour signaler des bugs ou demander des fonctionnalités, créez une issue sur le repository GitHub.
+To report bugs or request features, please create an issue on the GitHub repository.
