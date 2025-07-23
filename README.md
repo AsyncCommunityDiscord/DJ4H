@@ -6,7 +6,9 @@
 
 # <p align="center">`DJ4H`</p>
 
-This is a personal project for a multi-purpose Discord bot.
+All the projects in the <code>AsyncCommunityDiscord</code> organisation are used by the discord server <code>
+discord.gg/graven</code> both by the moderators and the members.
+Most of the contributors are part of the staff but the members are also allowed to contribute.
 
 ---
 
@@ -14,7 +16,7 @@ This is a personal project for a multi-purpose Discord bot.
 
 | Global information |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 |--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Description        | DJ4H is a multi-purpose Discord bot designed to enhance server engagement. It includes features for games, activity tracking, and server management, providing a dynamic and interactive experience for communities.                                                                                                                                                                                                                                                                                                                                          |
+| Description        | DJ4H is a Discord bot designed to enhance server engagement. It includes features for tracking activity engagement, providing a dynamic and interactive experience for communities.                                                                                                                                                                                                                                                                                                                                          |
 | Collaborators      | <img src="https://avatars.githubusercontent.com/u/73261020?v=4" alt="drawing" width="25"/> [Gamingdy](https://github.com/Gamingdy),  <img src="https://avatars.githubusercontent.com/u/34105327?s=64&v=4" alt="drawing" width="25"/> [Lindwen](https://github.com/Lindwen), <img src="https://avatars.githubusercontent.com/u/1571189?s=64&v=4" alt="drawing" width="25"/> [Loïc R](https://github.com/Lramelot),  <img src="https://avatars.githubusercontent.com/u/69684024?s=64&v=4" alt="drawing" width="25"/> [GabHas](https://github.com/TheRealGabHas) |
 | Version            | 1.0.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
