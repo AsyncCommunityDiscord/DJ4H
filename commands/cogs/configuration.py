@@ -96,6 +96,26 @@ class Configuration(commands.Cog):
 
     @slash_command()
     @discord.default_permissions()
+    async def unset(self, ctx, member: discord.Member):
+        """Unset a user's score."""
+        if not ctx.guild:
+            await ctx.respond("This command can only be used in a server.")
+            return
+
+        user = await UserDao.get_user(member.id, ctx.guild.id)
+
+        if user is None:
+            await ctx.respond(
+                f"User {member.mention} does not have a score set."
+            )
+            return
+
+        await UserDao.delete_user(member.id, ctx.guild.id)
+        await ctx.respond(f"Unset user {member.mention}'s score.")
+        LOGGER.info(f"User {member.id} removed from guild {ctx.guild.id}.")
+
+    @slash_command()
+    @discord.default_permissions()
     async def dump_log(self, ctx):
         """Dump the bot's log."""
         if not ctx.guild:

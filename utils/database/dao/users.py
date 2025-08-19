@@ -66,3 +66,17 @@ class UserDao:
             if user.user_id == user_id:
                 return index + 1
         return -1
+
+    @staticmethod
+    async def delete_user(user_id: int, guild_id: int):
+        async for session in get_db():
+            user_query = await session.execute(
+                select(User).filter(
+                    User.user_id == user_id, User.guild_id == guild_id
+                )
+            )
+            user = user_query.scalars().first()
+            if user is None:
+                return
+            await session.delete(user)
+            await session.commit()
