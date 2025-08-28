@@ -1,7 +1,7 @@
 ---
 services:
   dj4h-bot:
-    image: ghcr.io/gravendev/dj4h:latest
+    image: ghcr.io/asynccommunitydiscord/dj4h:latest
     container_name: dj4h-bot
     restart: unless-stopped
     environment:
