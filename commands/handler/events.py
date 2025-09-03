@@ -75,6 +75,16 @@ class EventHandler(commands.Cog):
                 LOGGER.info(
                     f"Updated user {last_message.author_id} in {ctx.guild.name} to score {new_score}"
                 )
+            member = await ctx.guild.fetch_member(last_message.author_id)
+            embed = discord.Embed(
+                title="Point Awarded!",
+                description=(
+                    f"{member.mention} "
+                    f"has been awarded a point! They now have {last_message_author.score + 1 if last_message_author else 1} points."
+                ),
+                color=0x00FF00,
+            )
+            await ctx.channel.send(embed=embed)
 
         await MessagesDao.add_message(
             ctx.id, guild.guild_id, current_time, ctx.author.id
