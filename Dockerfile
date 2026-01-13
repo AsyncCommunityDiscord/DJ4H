@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 
 # Update the system
 RUN apt update && apt upgrade -y
@@ -7,11 +7,13 @@ RUN apt update && apt upgrade -y
 RUN apt install -y --no-install-recommends gcc && apt clean
 
 # Install poetry
-RUN pip install poetry==2.1.3
+RUN pip install poetry==2.2.1
 
 WORKDIR /app
 
 COPY ./ /app
+
+RUN sed -i 's/\r$//' entrypoint.sh
 
 # Disable in-project venvs
 RUN poetry config virtualenvs.in-project false
