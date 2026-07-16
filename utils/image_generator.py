@@ -23,6 +23,9 @@ TIER_SQUARE_SIZE = 40
 type FontType = ImageFont.FreeTypeFont | ImageFont.ImageFont
 type ColorType = tuple[int, int, int]
 
+SPACE_WIDTH = 8
+NUM_WIDTH = 18.5
+
 
 class LeaderboardUser:
     user: discord.User
