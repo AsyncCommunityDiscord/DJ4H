@@ -26,6 +26,9 @@ type ColorType = tuple[int, int, int]
 SPACE_WIDTH = 8
 NUM_WIDTH = 18.5
 
+type FontType = ImageFont.FreeTypeFont | ImageFont.ImageFont
+type ColorType = tuple[int, int, int]
+
 
 class LeaderboardUser:
     user: discord.User
