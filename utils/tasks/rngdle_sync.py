@@ -13,6 +13,9 @@ from utils.rngdle import (
 # Register when the last sync was done, used for fetching cooldown
 _last_rngdle_sync = datetime.datetime.fromtimestamp(0)
 
+# Register when the last sync was done, used for fetching cooldown
+_last_rngdle_sync = datetime.datetime.fromtimestamp(0)
+
 
 async def _process_user(rng_client: RNGdleClient, db_user, log_mode: str = "background") -> dict:
     """
