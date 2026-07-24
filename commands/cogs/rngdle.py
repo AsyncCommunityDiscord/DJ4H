@@ -7,9 +7,17 @@ from discord.ext import commands
 from config import MAGIC_COLOR
 from utils import get_or_fetch_user
 from utils.database.dao.rngdle import RNGdleDao, RNGdleGuildConfigDao
+from utils.database.schema import RNGdle as RNGdleEntry
 from utils.image_generator import LeaderboardGenerator, RNGdleLeaderboardUser
 from utils.number_utils import format_number
-from utils.tasks.rngdle_sync import sync_guild_users
+from utils.rngdle import (
+    format_percent,
+    format_tier,
+    get_score_percent,
+    get_score_tier,
+    get_tier_color,
+)
+from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
 
 
 class RNGdle(commands.Cog):
@@ -65,7 +73,9 @@ class RNGdle(commands.Cog):
         )
         await ctx.respond(embed=message)
 
-    @rngdle_admin.command(description="Set the channel for daily RNGDLE leaderboard")
+    @rngdle_admin.command(
+        description="Set the channel for daily RNGDLE leaderboard"
+    )
     @discord.default_permissions(administrator=True)
     async def setleaderboard(
         self,
@@ -78,7 +88,9 @@ class RNGdle(commands.Cog):
             await ctx.respond("This command can only be used in a server!")
             return
 
-        await RNGdleGuildConfigDao.set_leaderboard_channel(ctx.guild.id, channel.id)
+        await RNGdleGuildConfigDao.set_leaderboard_channel(
+            ctx.guild.id, channel.id
+        )
         message = discord.Embed(
             title="RNGdle Leaderboard Channel",
             color=discord.Colour(MAGIC_COLOR),
@@ -127,21 +139,33 @@ class RNGdle(commands.Cog):
             await ctx.respond("This command can only be used in a server!")
             return
 
+        # Fetch rolls before accessing them
+        await rngdle_fetch_with_cooldown()
+
         scores = await RNGdleDao.get_today_scores(ctx.guild.id)
         if not scores:
             await ctx.respond("No today scores found.")
             return
 
         users: list[RNGdleLeaderboardUser] = []
-        for score in scores:
-            user = await get_or_fetch_user(self.bot, score.user_id)
+        for score_col in scores:
+            user = await get_or_fetch_user(self.bot, score_col.user_id)
             if user is None:
                 continue
+
+            score = int(score_col.score)
+            number = score_col.number
+
             u = RNGdleLeaderboardUser()
             u.user = user
-            u.score = format_number(score.score)
-            u.tirage = f"{score.number:,}".replace(",", " ")
+            u.score = format_number(score)
+            u.tirage = f"{number:,}".replace(",", " ")
             u.rank = len(users) + 1
+            u.tier = get_score_tier(score)
+            u.tier_text = format_tier(u.tier)
+            u.percent = get_score_percent(score)
+            u.percent_text = format_percent(int(u.percent))
+            u.tier_color = get_tier_color(u.tier)
             users.append(u)
 
         generated = await self.leaderboard_generator.generate_leaderboard(users)
