@@ -1,5 +1,4 @@
 ﻿from ast import literal_eval
-from bisect import bisect_left
 import bisect
 from datetime import datetime
 from enum import Enum
@@ -50,10 +49,7 @@ def load_score_to_percent_table():
             LOGGER.warning(
                 f"RNGdle: found key of type {type(actual_score)} with value {actual_score} while parsing score_to_percent.json"
             )
-        elif (
-            isinstance(actual_score, float)
-            and int(actual_score) != actual_score
-        ):
+        elif isinstance(actual_score, float) and int(actual_score) != actual_score:
             LOGGER.warning(
                 f"RNGdle: found key with value {actual_score} (invalid score) while parsing score_to_percent.json"
             )
@@ -66,9 +62,7 @@ def load_compressed_score_to_percent_table():
 
     root_path = Path(__file__).parent.parent
     rngdle_resources = root_path / "ressources" / "rngdle"
-    with open(
-        rngdle_resources / "compressed_score_to_percent.json", mode="r"
-    ) as file:
+    with open(rngdle_resources / "compressed_score_to_percent.json", mode="r") as file:
         data = json.load(file)
 
     evaluated_data: dict[int, float] = {}
@@ -78,10 +72,7 @@ def load_compressed_score_to_percent_table():
             LOGGER.warning(
                 f"RNGdle: found key of type {type(actual_score)} with value {actual_score} while parsing score_to_percent.json"
             )
-        elif (
-            isinstance(actual_score, float)
-            and int(actual_score) != actual_score
-        ):
+        elif isinstance(actual_score, float) and int(actual_score) != actual_score:
             LOGGER.warning(
                 f"RNGdle: found key with value {actual_score} (invalid score) while parsing score_to_percent.json"
             )
@@ -239,9 +230,7 @@ def format_percent(percent: int):
 
 class RNGdle:
     def __init__(self):
-        self.api_url = (
-            "https://www.rngdle.com/api/users/{}/rolls?limit=100&offset={}"
-        )
+        self.api_url = "https://www.rngdle.com/api/users/{}/rolls?limit=100&offset={}"
 
     def get_user_rolls(
         self, username, previous_roll: list[UserRolls] | None = None, offset=0
@@ -256,9 +245,7 @@ class RNGdle:
             user_roll = to_user_rolls(result["rolls"])
             previous_roll += user_roll
             if result["hasMore"]:
-                return self.get_user_rolls(
-                    username, previous_roll, offset + 100
-                )
+                return self.get_user_rolls(username, previous_roll, offset + 100)
             return previous_roll
         else:
             return None

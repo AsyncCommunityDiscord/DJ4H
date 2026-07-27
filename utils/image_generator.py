@@ -6,7 +6,15 @@ import discord
 from PIL import Image, ImageDraw, ImageFont
 
 from config import LOGGER
-from utils.rngdle import Tier
+from utils.number_utils import format_number
+from utils.rngdle import (
+    Tier,
+    format_percent,
+    format_tier,
+    get_score_percent,
+    get_score_tier,
+    get_tier_color,
+)
 
 SPACE_WIDTH = 8
 NUM_WIDTH = 18.5
@@ -48,6 +56,22 @@ class RNGdleLeaderboardUser(LeaderboardUser):
 
     def get_column_values(self) -> list[str]:
         return [self.tirage, self.score, self.percent_text]
+
+    @classmethod
+    def create_user_instance(
+        cls, user: discord.User, score: int, number: int, rank: int
+    ):
+        new_user = cls()
+        new_user.user = user
+        new_user.score = format_number(score)
+        new_user.tirage = f"{number:,}".replace(",", " ")
+        new_user.rank = rank
+        new_user.tier = get_score_tier(score)
+        new_user.tier_text = format_tier(new_user.tier)
+        new_user.percent = get_score_percent(score)
+        new_user.percent_text = format_percent(int(new_user.percent))
+        new_user.tier_color = get_tier_color(new_user.tier)
+        return new_user
 
 
 class JD4HLeaderboardUser(LeaderboardUser):
@@ -103,9 +127,9 @@ class LeaderboardGenerator:
             .resize((50, 50))
         )
 
-        self._ARROW_UP = Image.open(
-            self.base_path / "rngdle" / "arrow_up.png"
-        ).resize((40, 40))
+        self._ARROW_UP = Image.open(self.base_path / "rngdle" / "arrow_up.png").resize(
+            (40, 40)
+        )
 
         self._TRASH = (
             Image.open(self.base_path / "rngdle" / "trash.png")
@@ -240,9 +264,7 @@ class LeaderboardGenerator:
         min_possible_width = self.WIDTH
         if model.column_x_offsets:
             last_start_pos = model.column_x_offsets[-1]
-            has_spacer = len(model.column_x_offsets) != len(
-                model.column_max_widths
-            )
+            has_spacer = len(model.column_x_offsets) != len(model.column_max_widths)
             last_width = (
                 model.column_max_widths[-2]
                 if has_spacer
@@ -253,9 +275,7 @@ class LeaderboardGenerator:
 
             min_possible_width = max(min_possible_width, total_width)
 
-        img = Image.new(
-            "RGB", (min_possible_width, total_height), self.BG_COLOR
-        )
+        img = Image.new("RGB", (min_possible_width, total_height), self.BG_COLOR)
         draw = ImageDraw.Draw(img)
 
         draw.rectangle(
@@ -286,9 +306,7 @@ class LeaderboardGenerator:
         for user in users:
             y_pos = self.HEADER_HEIGHT + ((user.rank - 1) * self.ROW_HEIGHT)
             row_color = (
-                self.ROW_EVEN_COLOR
-                if (user.rank - 1) % 2 == 0
-                else self.ROW_ODD_COLOR
+                self.ROW_EVEN_COLOR if (user.rank - 1) % 2 == 0 else self.ROW_ODD_COLOR
             )
             draw.rectangle(
                 [0, y_pos, min_possible_width, y_pos + self.ROW_HEIGHT],
@@ -416,9 +434,7 @@ class LeaderboardGenerator:
                             )
                         else:
                             arrow_img = (
-                                self.TRASH_EVEN
-                                if user.rank % 2
-                                else self.TRASH_ODD
+                                self.TRASH_EVEN if user.rank % 2 else self.TRASH_ODD
                             )
 
                         text_length = self._get_fittex_text_length(
@@ -429,9 +445,7 @@ class LeaderboardGenerator:
                         arrow_x_right = text_x_left - 10
                         arrow_x_left = int(arrow_x_right - arrow_img.width)
                         arrow_y_top = int(col_y - 10)
-                        draw._image.paste(
-                            arrow_img, (arrow_x_left, arrow_y_top)
-                        )
+                        draw._image.paste(arrow_img, (arrow_x_left, arrow_y_top))
 
                 draw_func(
                     draw,
