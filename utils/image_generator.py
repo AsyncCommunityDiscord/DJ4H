@@ -69,7 +69,7 @@ class RNGdleLeaderboardUser(LeaderboardUser):
         new_user.tier = get_score_tier(score)
         new_user.tier_text = format_tier(new_user.tier)
         new_user.percent = get_score_percent(score)
-        new_user.percent_text = format_percent(int(new_user.percent))
+        new_user.percent_text = format_percent(new_user.percent)
         new_user.tier_color = get_tier_color(new_user.tier)
         return new_user
 
@@ -95,13 +95,13 @@ class LeaderboardGenerator:
     HEADER_HEIGHT: int = 100
 
     # Slightly lighter header background
-    BG_COLOR: ColorType = (25, 25, 25) # Dark background
-    TEXT_COLOR: ColorType = (255, 255, 255) # White text
-    
+    BG_COLOR: ColorType = (25, 25, 25)  # Dark background
+    TEXT_COLOR: ColorType = (255, 255, 255)  # White text
+
     HEADER_BG_COLOR: ColorType = (50, 50, 50)
-    ROW_EVEN_COLOR: ColorType = (35, 35, 35) # Even row background
-    ROW_ODD_COLOR: ColorType = (45, 45, 45) # Odd row background
-    HIGHLIGHT_COLOR: ColorType = (0, 100, 200) # For "async" button
+    ROW_EVEN_COLOR: ColorType = (35, 35, 35)  # Even row background
+    ROW_ODD_COLOR: ColorType = (45, 45, 45)  # Odd row background
+    HIGHLIGHT_COLOR: ColorType = (0, 100, 200)  # For "async" button
 
     def __init__(self):
         self.font_path: pathlib.Path | None = None
@@ -196,7 +196,7 @@ class LeaderboardGenerator:
             return base_font
         font = base_font
         font_path = getattr(font, "path", self.font_path)
-        font_size = getattr(font, "size", 30) # 30 is regular font size
+        font_size = getattr(font, "size", 30)  # 30 is regular font size
         while draw.textlength(text, font=font) > max_width and font_size > 1:
             font_size -= 1
             font = ImageFont.truetype(font_path, font_size)
@@ -228,7 +228,7 @@ class LeaderboardGenerator:
             return
         font = base_font
         font_path = getattr(font, "path", self.font_path)
-        font_size = getattr(font, "size", 30) # 30 is regular font size
+        font_size = getattr(font, "size", 30)  # 30 is regular font size
         while draw.textlength(text, font=font) > max_width and font_size > 1:
             font_size -= 1
             font = ImageFont.truetype(font_path, font_size)
@@ -293,7 +293,7 @@ class LeaderboardGenerator:
 
             anchor = "lt"
             if model == RNGdleLeaderboardUser and i >= 2:
-                 # Anchor to the right and fix the x position for the text
+                # Anchor to the right and fix the x position for the text
                 anchor = "rt"
                 x += model.column_max_widths[i - 2]
 
@@ -414,7 +414,7 @@ class LeaderboardGenerator:
                     draw_func = self._draw_fitted_align_right
                     user = typing.cast(RNGdleLeaderboardUser, user)
 
-                    if user.column_headers[col_idx] == "Tirage": # RNGdle draw
+                    if user.column_headers[col_idx] == "Tirage":  # RNGdle draw
                         # Left pad the number string to be at least 7 chars long for even rendering
                         col_text = f"{col_text:>7}"
                         font = self.font_mono_regular
@@ -469,20 +469,22 @@ class LeaderboardGenerator:
 
 class ProfileGenerator:
     WIDTH: int = 800
-    HEIGHT: int = 610  
+    HEIGHT: int = 610
     HEADER_HEIGHT: int = 150
 
-    BG_COLOR: ColorType = (25, 25, 25)           
-    TEXT_COLOR: ColorType = (255, 255, 255)      
-    HEADER_BG_COLOR: ColorType = (50, 50, 50)    
-    BOX_COLOR: ColorType = (35, 35, 35)          
-    TITLE_COLOR: ColorType = (200, 200, 200)     
-    SUBTEXT_COLOR: ColorType = (170, 170, 170)   
+    BG_COLOR: ColorType = (25, 25, 25)
+    TEXT_COLOR: ColorType = (255, 255, 255)
+    HEADER_BG_COLOR: ColorType = (50, 50, 50)
+    BOX_COLOR: ColorType = (35, 35, 35)
+    TITLE_COLOR: ColorType = (200, 200, 200)
+    SUBTEXT_COLOR: ColorType = (170, 170, 170)
 
     def __init__(self):
-        self.base_path: pathlib.Path = pathlib.Path(__file__).parent.resolve() / ".." / "ressources"
+        self.base_path: pathlib.Path = (
+            pathlib.Path(__file__).parent.resolve() / ".." / "ressources"
+        )
         self._load_fonts()
-        self._load_images() 
+        self._load_images()
 
     def _load_fonts(self):
         font_file = self.base_path / "font" / "outfit.ttf"
@@ -504,9 +506,21 @@ class ProfileGenerator:
     def _load_images(self):
         try:
             img_dir = self.base_path / "images"
-            self.PODIUM_BRONZE = Image.open(str(img_dir / "medal_bronze.png")).convert("RGBA").resize((93, 90))
-            self.PODIUM_SILVER = Image.open(str(img_dir / "medal_silver.png")).convert("RGBA").resize((93, 90))
-            self.PODIUM_GOLD = Image.open(str(img_dir / "medal_gold.png")).convert("RGBA").resize((90, 90))
+            self.PODIUM_BRONZE = (
+                Image.open(str(img_dir / "medal_bronze.png"))
+                .convert("RGBA")
+                .resize((93, 90))
+            )
+            self.PODIUM_SILVER = (
+                Image.open(str(img_dir / "medal_silver.png"))
+                .convert("RGBA")
+                .resize((93, 90))
+            )
+            self.PODIUM_GOLD = (
+                Image.open(str(img_dir / "medal_gold.png"))
+                .convert("RGBA")
+                .resize((90, 90))
+            )
         except Exception:
             self.PODIUM_BRONZE = None
             self.PODIUM_SILVER = None
@@ -516,23 +530,33 @@ class ProfileGenerator:
         img = Image.new("RGB", (self.WIDTH, self.HEIGHT), self.BG_COLOR)
         draw = ImageDraw.Draw(img)
 
-        draw.rectangle([0, 0, self.WIDTH, self.HEADER_HEIGHT], fill=self.HEADER_BG_COLOR)
+        draw.rectangle(
+            [0, 0, self.WIDTH, self.HEADER_HEIGHT], fill=self.HEADER_BG_COLOR
+        )
 
         avatar_x, avatar_y, avatar_size = 40, 25, 100
         try:
             if user:
                 avatar_data = await user.avatar.read()
-                avatar_img = Image.open(BytesIO(avatar_data)).resize((avatar_size, avatar_size)).convert("RGBA")
+                avatar_img = (
+                    Image.open(BytesIO(avatar_data))
+                    .resize((avatar_size, avatar_size))
+                    .convert("RGBA")
+                )
             else:
                 raise Exception()
             self.create_avatar_mask(avatar_img, avatar_size, avatar_x, avatar_y, img)
         except Exception:
-            default_avatar = Image.new("RGBA", (avatar_size, avatar_size), (120, 120, 120, 255))
-            self.create_avatar_mask(default_avatar, avatar_size, avatar_x, avatar_y, img)
+            default_avatar = Image.new(
+                "RGBA", (avatar_size, avatar_size), (120, 120, 120, 255)
+            )
+            self.create_avatar_mask(
+                default_avatar, avatar_size, avatar_x, avatar_y, img
+            )
 
         draw.text((170, 35), username, fill=self.TEXT_COLOR, font=self.font_title)
-        
-        rank = stats.get('server_rank', 0)
+
+        rank = stats.get("server_rank", 0)
         if rank > 0:
             if rank == 1 and self.PODIUM_GOLD:
                 img.paste(self.PODIUM_GOLD, (670, 30), self.PODIUM_GOLD)
@@ -543,51 +567,110 @@ class ProfileGenerator:
             else:
                 rank_str = f"#{rank}"
                 rank_width = draw.textlength(rank_str, font=self.font_rank)
-                draw.text((760 - rank_width, 25), rank_str, fill=(150, 150, 150), font=self.font_rank)
+                draw.text(
+                    (760 - rank_width, 25),
+                    rank_str,
+                    fill=(150, 150, 150),
+                    font=self.font_rank,
+                )
 
         best_roll_y = 180
-        tier = get_score_tier(stats['highest_score'])
+        tier = get_score_tier(stats["highest_score"])
         rarity_color = get_tier_color(tier)
-        
-        draw.rounded_rectangle([40, best_roll_y, 760, best_roll_y + 130], radius=15, fill=self.BOX_COLOR, outline=rarity_color, width=2)
-        
+
+        draw.rounded_rectangle(
+            [40, best_roll_y, 760, best_roll_y + 130],
+            radius=15,
+            fill=self.BOX_COLOR,
+            outline=rarity_color,
+            width=2,
+        )
+
         lucky_seed_str = f"{stats['lucky_seed']:,}".replace(",", " ")
         score_str = f"({stats['highest_score']:,} EP)".replace(",", " ")
-        
-        draw.text((65, best_roll_y + 15), "BEST ROLL", fill=rarity_color, font=self.font_small)
-        draw.text((65, best_roll_y + 50), lucky_seed_str, fill=rarity_color, font=self.font_large) 
-        
+
+        draw.text(
+            (65, best_roll_y + 15), "BEST ROLL", fill=rarity_color, font=self.font_small
+        )
+        draw.text(
+            (65, best_roll_y + 50),
+            lucky_seed_str,
+            fill=rarity_color,
+            font=self.font_large,
+        )
+
         seed_width = draw.textlength(lucky_seed_str + " ", font=self.font_large)
-        draw.text((65 + seed_width, best_roll_y + 50), score_str, fill=(215, 215, 215), font=self.font_large)
-        
+        draw.text(
+            (65 + seed_width, best_roll_y + 50),
+            score_str,
+            fill=(215, 215, 215),
+            font=self.font_large,
+        )
+
         date_str = f"Date : {stats['highest_date']}"
         date_width = draw.textlength(date_str, font=self.font_small)
-        draw.text((735 - date_width, best_roll_y + 60), date_str, fill=self.SUBTEXT_COLOR, font=self.font_small)
+        draw.text(
+            (735 - date_width, best_roll_y + 60),
+            date_str,
+            fill=self.SUBTEXT_COLOR,
+            font=self.font_small,
+        )
 
-        def draw_stat_box(x, y, title, value, subtext=None, value_font=None, outline_color=None, value_color=None):
+        def draw_stat_box(
+            x,
+            y,
+            title,
+            value,
+            subtext=None,
+            value_font=None,
+            outline_color=None,
+            value_color=None,
+        ):
             if value_font is None:
                 value_font = self.font_regular
             if value_color is None:
                 value_color = self.TEXT_COLOR
-                
+
             if outline_color:
-                draw.rounded_rectangle([x, y, x + 350, y + 110], radius=12, fill=self.BOX_COLOR, outline=outline_color, width=2)
+                draw.rounded_rectangle(
+                    [x, y, x + 350, y + 110],
+                    radius=12,
+                    fill=self.BOX_COLOR,
+                    outline=outline_color,
+                    width=2,
+                )
             else:
-                draw.rounded_rectangle([x, y, x + 350, y + 110], radius=12, fill=self.BOX_COLOR)
-                
-            draw.text((x + 20, y + 15), title, fill=self.TITLE_COLOR, font=self.font_small)
+                draw.rounded_rectangle(
+                    [x, y, x + 350, y + 110], radius=12, fill=self.BOX_COLOR
+                )
+
+            draw.text(
+                (x + 20, y + 15), title, fill=self.TITLE_COLOR, font=self.font_small
+            )
             y_offset = 48 if value_font == self.font_small else 45
             draw.text((x + 20, y + y_offset), value, fill=value_color, font=value_font)
             if subtext:
-                draw.text((x + 20, y + 82), subtext, fill=self.SUBTEXT_COLOR, font=self.font_tiny)
+                draw.text(
+                    (x + 20, y + 82),
+                    subtext,
+                    fill=self.SUBTEXT_COLOR,
+                    font=self.font_tiny,
+                )
 
         avg_score_str = f"{stats['avg_score']:,}".replace(",", " ") + " EP"
         overall_score_str = f"{stats['total_score_sum']:,}".replace(",", " ") + " EP"
-        avg_tier = get_score_tier(stats['avg_score'])
+        avg_tier = get_score_tier(stats["avg_score"])
         avg_color = get_tier_color(avg_tier)
 
-        draw_stat_box(40, 340, "Total Rolls", str(stats['total_rolls']))
-        draw_stat_box(410, 340, "Average Score", avg_score_str, outline_color=avg_color, value_color=avg_color)
+        draw_stat_box(40, 340, "Total Rolls", str(stats["total_rolls"]))
+        draw_stat_box(
+            410,
+            340,
+            "Average Score",
+            avg_score_str,
+            outline_color=avg_color,
+            value_color=avg_color,
+        )
         draw_stat_box(40, 470, "Max Badges", f"{stats['max_badges']} badges at once")
         draw_stat_box(410, 470, "Overall Score", overall_score_str)
 
