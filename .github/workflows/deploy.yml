@@ -1,4 +1,4 @@
-name: Build & Push DJ4H Docker Images
+name: Build & Deploy DJ4H
 
 on:
     push:
@@ -13,7 +13,7 @@ env:
     IMAGE_NAME: ${{ github.repository }} # "user/repo-name"
 
 jobs:
-    build-and-push:
+    build:
         name: Build and push Docker images
         runs-on: ubuntu-latest
 
@@ -62,3 +62,17 @@ jobs:
                   labels: ${{ steps.meta.outputs.labels }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
+    
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+          - uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+            with:
+              host: ${{ secrets.HOST }}
+              username: ${{ secrets.USER }}
+              key: ${{ secrets.SSH_KEY }}
+              script: |
+                cd docker/dj4h
+                docker compose pull
+                docker compose up -d --remove-orphans
