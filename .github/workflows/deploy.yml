@@ -73,6 +73,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd docker/dj4h
+            cd /opt/dj4h
             docker compose pull
             docker compose up -d --remove-orphans
