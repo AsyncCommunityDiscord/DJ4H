@@ -311,11 +311,24 @@ class RNGdle(commands.Cog):
                 return
 
         total_rolls = len(rolls)
-        highest_score = 0
+        highest_score = -1
+        lowest_score = float("inf")
         total_score_sum = 0
         lucky_number = 0
+        unlucky_number = 0
         max_badges = 0
         highest_date = None
+        lowest_date = None
+
+        rarity_counts = {
+            "MYTHIC": 0,
+            "ANOMALY": 0,
+            "EPIC": 0,
+            "RARE": 0,
+            "UNCOMMON": 0,
+            "COMMON": 0,
+            "TRASH": 0,
+        }
 
         for roll in rolls:
             score = roll.score
@@ -331,8 +344,17 @@ class RNGdle(commands.Cog):
                 highest_date = rolled_date
                 lucky_number = num
 
+            if score < lowest_score:
+                lowest_score = score
+                lowest_date = rolled_date
+                unlucky_number = num
+
             if badges > max_badges:
                 max_badges = badges
+
+            tier = get_score_tier(score).name
+            if tier in rarity_counts:
+                rarity_counts[tier] += 1
 
         avg_score = int(total_score_sum / total_rolls) if total_rolls > 0 else 0
 
@@ -346,9 +368,13 @@ class RNGdle(commands.Cog):
             "highest_score": highest_score,
             "highest_date": (highest_date.strftime("%d %b %Y") if highest_date else "N/A"),
             "lucky_seed": lucky_number,
+            "lowest_score": lowest_score if lowest_score != float("inf") else 0,
+            "lowest_date": (lowest_date.strftime("%d %b %Y") if lowest_date else "N/A"),
+            "unlucky_seed": unlucky_number,
             "max_badges": max_badges,
             "server_rank": rank,
             "total_players": total_players,
+            "rarities": rarity_counts,
         }
 
         img = await self.profile_generator.generate_profile(member, rngdle_username, stats_dict)
@@ -436,21 +462,17 @@ class RNGdle(commands.Cog):
                 if tier in user_rarity_counts[user_id]:
                     user_rarity_counts[user_id][tier] += 1
 
-        tier_kings = {
-            "TRASH": {"id": None, "max": 0},
-            "COMMON": {"id": None, "max": 0},
-            "UNCOMMON": {"id": None, "max": 0},
-            "RARE": {"id": None, "max": 0},
-            "EPIC": {"id": None, "max": 0},
-            "ANOMALY": {"id": None, "max": 0},
-            "MYTHIC": {"id": None, "max": 0},
-        }
+        tiers_list = ["TRASH", "COMMON", "UNCOMMON", "RARE", "EPIC", "ANOMALY", "MYTHIC"]
+        tier_kings = {t: [] for t in tiers_list}
 
-        for uid, counts in user_rarity_counts.items():
-            for t in tier_kings:
-                if counts[t] > tier_kings[t]["max"]:
-                    tier_kings[t]["max"] = counts[t]
-                    tier_kings[t]["id"] = uid
+        for tier in tiers_list:
+            tier_users = [
+                (uid, counts[tier])
+                for uid, counts in user_rarity_counts.items()
+                if counts[tier] > 0
+            ]
+            tier_users.sort(key=lambda x: x[1], reverse=True)
+            tier_kings[tier] = tier_users[:3]
 
         avg_score = int(overall_score / total_rolls) if total_rolls > 0 else 0
 
@@ -464,10 +486,12 @@ class RNGdle(commands.Cog):
             worst_member = await get_or_fetch_user(self.bot, int(worst_roll["user_id"]))
         worst_roll["member"] = worst_member
 
-        tier_members = {}
-        for t, king in tier_kings.items():
-            if king["id"]:
-                tier_members[t] = await get_or_fetch_user(self.bot, int(king["id"]))
+        tier_members = {t: [] for t in tiers_list}
+        for t, kings in tier_kings.items():
+            for uid, count in kings:
+                member = await get_or_fetch_user(self.bot, int(uid))
+                if member:
+                    tier_members[t].append(member)
 
         stats_dict = {
             "total_rolls": total_rolls,
