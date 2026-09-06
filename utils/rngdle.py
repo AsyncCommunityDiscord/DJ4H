@@ -91,15 +91,21 @@ def fetch_score_to_percent_string():
     return result.group()
 
 
-def load_score_to_percent_table():
-    with open(SCORE_TO_PERCENT_PATH) as file:
+def load_score_to_percent_table() -> dict[int, float]:
+    if not SCORE_TO_PERCENT_PATH.exists():
+        return {}
+
+    with open(SCORE_TO_PERCENT_PATH, mode="r") as file:
         data_raw = file.read()
 
     parsed_table = parse_score_to_percent_table(data_raw)
     return evaluate_score_to_percent_table(parsed_table)
 
 
-def load_compressed_score_to_percent_table():
+def load_compressed_score_to_percent_table() -> dict[int, float]:
+    if not COMPRESSED_SCORE_TO_PERCENT_PATH.exists():
+        return {}
+
     with open(COMPRESSED_SCORE_TO_PERCENT_PATH, mode="r") as file:
         data = json.load(file)
     score_to_percent_table: dict[int, float] = {
@@ -118,19 +124,27 @@ def store_compressed_score_to_percent_table(new_table: dict[int, float]):
         json.dump(new_table, file)
 
 
-def update_compressed_score_to_percent_table():
+def update_compressed_score_to_percent_table() -> bool:
+    "Updates the RNGdle score->percent table. Returns whether the table has changed."
     LOGGER.info("RNGdle table sync: Start update of the score to percent table")
     score_to_percent_raw = fetch_score_to_percent_string()
     if not score_to_percent_raw:
         LOGGER.warning(
             "RNGdle: Could not fetch the score to percent table from the website, aborting the update"
         )
-        return
+        return False
     score_to_percent_parsed = parse_score_to_percent_table(score_to_percent_raw)
     score_to_percent_table = evaluate_score_to_percent_table(score_to_percent_parsed)
     compressed_score_to_percent = compress_score_to_percent(score_to_percent_table)
-    store_compressed_score_to_percent_table(compressed_score_to_percent)
-    LOGGER.info("RNGdle table sync: Successfully updated the score to percent table")
+
+    if compressed_score_to_percent != COMPRESSED_SCORE_TO_PERCENT:
+        # The table has changed
+        store_compressed_score_to_percent_table(compressed_score_to_percent)
+        LOGGER.info("RNGdle table sync: Successfully updated the score to percent table")
+        return True
+
+    LOGGER.info("RNGdle table sync: Success, no update needed for the score to percent table")
+    return False
 
 
 def compress_score_to_percent(dico: dict[int, float]) -> dict[int, float]:
@@ -300,6 +314,10 @@ class RNGdle:
 
 
 if __name__ == "__main__":
+    from config import setup_logging
+
+    setup_logging()
+
     # Perform some operations on rngdle resources to test updates mechanisms
     arg_parser = argparse.ArgumentParser()
 
