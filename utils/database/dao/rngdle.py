@@ -105,7 +105,7 @@ class RNGdleDao:
         We consider a roll identical if user_id + date + number match an existing row.
         """
         async for session in get_db():
-            if RNGdleDao.roll_exists(user_id, date, number):
+            if await RNGdleDao.roll_exists(user_id, date, number):
                 return False
 
             rng = RNGdle(
