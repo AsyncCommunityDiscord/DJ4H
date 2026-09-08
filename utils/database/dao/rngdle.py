@@ -75,6 +75,22 @@ class RNGdleDao:
         return None
 
     @staticmethod
+    async def roll_exists(user_id: int, date: int, number: int) -> bool:
+        """Return whether a roll exists. Checks for user_id+date+number in the DB."""
+        async for session in get_db():
+            existing = await session.execute(
+                select(RNGdle).filter(
+                    RNGdle.user_id == user_id,
+                    RNGdle.date == date,
+                    RNGdle.number == number,
+                )
+            )
+            existing_row = existing.scalars().first()
+            return existing_row is not None
+
+        return False
+
+    @staticmethod
     async def upsert_rngdle(
         user_id: int,
         guild_id: int,
@@ -89,15 +105,7 @@ class RNGdleDao:
         We consider a roll identical if user_id + date + number match an existing row.
         """
         async for session in get_db():
-            existing = await session.execute(
-                select(RNGdle).filter(
-                    RNGdle.user_id == user_id,
-                    RNGdle.date == date,
-                    RNGdle.number == number,
-                )
-            )
-            existing_row = existing.scalars().first()
-            if existing_row is not None:
+            if await RNGdleDao.roll_exists(user_id, date, number):
                 return False
 
             rng = RNGdle(
@@ -111,6 +119,32 @@ class RNGdleDao:
             session.add(rng)
             await session.commit()
             return True
+
+    @staticmethod
+    async def update_roll(
+        user_id: int,
+        date: int,
+        score: int,
+        number: int,
+        badges: int,
+    ) -> None:
+        """Update an existing roll searched by user_id+date+number with new score and badge count."""
+        # return
+        async for session in get_db():
+            existing = await session.execute(
+                select(RNGdle).filter(
+                    RNGdle.user_id == user_id,
+                    RNGdle.date == date,
+                    RNGdle.number == number,
+                )
+            )
+            existing_row = existing.scalars().first()
+            if existing_row is None:
+                raise ValueError("tried to update a row that doesn't exist")
+
+            existing_row.score = score
+            existing_row.badge_count = badges
+            await session.commit()
 
     @staticmethod
     async def get_today_scores(
@@ -161,6 +195,23 @@ class RNGdleDao:
             query = select(RNGdle).filter(RNGdle.user_id == user_id, RNGdle.guild_id == guild_id)
             rows = await session.execute(query)
             return rows.scalars().all()
+        return None
+
+    @staticmethod
+    async def get_user_most_recent_roll(user_id: int, guild_id: int) -> RNGdle | None:
+        async for session in get_db():
+            most_recent_date = (
+                select(func.max(RNGdle.date))
+                .filter(RNGdle.user_id == user_id, RNGdle.guild_id == guild_id)
+                .scalar_subquery()
+            )
+            query = select(RNGdle).filter(
+                RNGdle.user_id == user_id,
+                RNGdle.guild_id == guild_id,
+                RNGdle.date == most_recent_date,
+            )
+            rows = await session.execute(query)
+            return rows.scalars().first()
         return None
 
     @staticmethod

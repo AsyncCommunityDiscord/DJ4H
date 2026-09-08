@@ -12,6 +12,7 @@ from utils.database.dao.rngdle import (
     get_yesterday_range,
 )
 from utils.image_generator import LeaderboardGenerator, RNGdleLeaderboardUser
+from utils.tasks.rngdle_sync import rngdle_fetch_task
 
 
 @tasks.loop(time=time(hour=0, minute=0, tzinfo=timezone.utc))
@@ -29,6 +30,8 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
         channel = guild.get_channel(config.leaderboard_channel_id)
         if channel is None or not isinstance(channel, discord.TextChannel):
             continue
+
+        await rngdle_fetch_task()
 
         start_ts, end_ts = get_yesterday_range()
         scores = await RNGdleDao.get_scores_in_range(config.guild_id, start_ts, end_ts)
@@ -74,3 +77,29 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
 @rngdle_daily_leaderboard_task.error
 async def on_daily_leaderboard_error(exc: Exception) -> None:
     LOGGER.error(f"Daily leaderboard task error: {exc}")
+
+
+if __name__ == "__main__":
+    from config import DEBUG_GUILD_ID, setup_logging, BOT_TOKEN
+    from utils.database import init_db
+
+    setup_logging()
+
+    bot = discord.AutoShardedBot(
+        intents=discord.Intents.default(),
+        help_command=None,  # Disable the default help command
+        debug_guilds=[DEBUG_GUILD_ID] if DEBUG_GUILD_ID else None,
+    )
+
+    @bot.event
+    async def on_ready():
+        LOGGER.info("Testing locally")
+        LOGGER.info("------")
+        await init_db()
+        LOGGER.info("Database initialized successfully.")
+        LOGGER.info("------")
+
+        await rngdle_daily_leaderboard_task(bot)
+        await bot.close()
+
+    bot.run(BOT_TOKEN)
