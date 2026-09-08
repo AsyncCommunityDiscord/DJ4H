@@ -106,7 +106,7 @@ async def rngdle_score_to_percent_autoupdate_task() -> None:
 
 
 @rngdle_score_to_percent_autoupdate_task.error
-async def on_rngdle_sync_error(exc: Exception) -> None:
+async def on_rngdle_table_sync_error(exc: Exception) -> None:
     LOGGER.error(f"RNGdle table update task error: {exc}")
 
 
@@ -126,7 +126,7 @@ async def rngdle_fetch_task() -> list[dict[str, int]]:
             ]
         stats = [task.result() for task in tasks]
 
-    LOGGER.info(f"RNGdle sync: pass complete")
+    LOGGER.info("RNGdle sync: pass complete")
 
     return stats
 
