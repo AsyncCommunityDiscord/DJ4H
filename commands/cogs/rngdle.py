@@ -9,6 +9,7 @@ from discord.ext import commands
 from config import MAGIC_COLOR
 from utils import get_or_fetch_user
 from utils.database.dao.rngdle import RNGdleDao, RNGdleGuildConfigDao
+from utils.database.schema import RNGdle as RNGdleCol
 from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
 from utils.image_generator import (
     LeaderboardGenerator,
@@ -227,16 +228,22 @@ class RNGdle(commands.Cog):
             return
 
         users: list[RNGdleLeaderboardUser] = []
-        for score_col in scores:
-            user = await get_or_fetch_user(self.bot, score_col.user_id)
+
+        async def add_user(score_col: RNGdleCol):
+            user = await get_or_fetch_user(self.bot, int(score_col.user_id))
             if user is None:
-                continue
+                return
 
             score = int(score_col.score)
             number = int(score_col.number)
-            u = RNGdleLeaderboardUser.create_user_instance(user, score, number, len(users) + 1)
+            u = await RNGdleLeaderboardUser.create_user_instance(
+                user, score, number, len(users) + 1
+            )
             users.append(u)
 
+        async with asyncio.TaskGroup() as tg:
+            for score_col in scores:
+                tg.create_task(add_user(score_col))
         generated = await self.leaderboard_generator.generate_leaderboard(users)
         buffer = BytesIO()
         generated.save(buffer, format="PNG")

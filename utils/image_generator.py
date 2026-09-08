@@ -27,6 +27,7 @@ type ColorType = tuple[int, int, int]
 class LeaderboardUser:
     user: discord.User
     rank: int
+    avatar_img: Image.Image
 
     column_headers: list[str] = []
     column_x_offsets: list[int] = []
@@ -54,10 +55,11 @@ class RNGdleLeaderboardUser(LeaderboardUser):
         return [self.tirage, self.score, self.percent_text]
 
     @classmethod
-    def create_user_instance(cls, user: discord.User, score: int, number: int, rank: int):
+    async def create_user_instance(cls, user: discord.User, score: int, number: int, rank: int):
         new_user = cls()
         new_user.user = user
         new_user.score = format_number(score)
+        new_user.avatar_img = await get_user_avatar_img(user)
         new_user.tirage = f"{number:,}".replace(",", " ")
         new_user.rank = rank
         new_user.tier = get_score_tier(score)
@@ -341,12 +343,7 @@ class LeaderboardGenerator:
             avatar_y = y_pos + 15
             avatar_size = 60
             try:
-                avatar_data = await user.user.avatar.read()
-                avatar_img = (
-                    Image.open(BytesIO(avatar_data))
-                    .resize((avatar_size, avatar_size))
-                    .convert("RGBA")
-                )
+                avatar_img = user.avatar_img.resize((avatar_size, avatar_size)).convert("RGBA")
                 self.create_avatar_mask(avatar_img, avatar_size, avatar_x, avatar_y, img)
             except Exception:
                 default_avatar = Image.new("RGBA", (avatar_size, avatar_size), (120, 120, 120, 255))
@@ -1132,3 +1129,7 @@ class OverallLeaderboardGenerator:
         mask = mask.resize((avatar_size, avatar_size), Image.Resampling.LANCZOS)
         avatar_img.putalpha(mask)
         img.paste(avatar_img, (avatar_x, avatar_y), avatar_img)
+
+
+async def get_user_avatar_img(user: discord.User) -> Image.Image:
+    return Image.open(BytesIO(await user.display_avatar.read()))

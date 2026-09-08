@@ -8,7 +8,7 @@ from config import LOGGER, MAGIC_COLOR
 from utils import get_or_fetch_user
 from utils.database.dao.guilds import GuildsDao
 from utils.database.dao.users import UserDao
-from utils.image_generator import JD4HLeaderboardUser, LeaderboardGenerator
+from utils.image_generator import JD4HLeaderboardUser, LeaderboardGenerator, get_user_avatar_img
 
 
 def convert_time_to_seconds(time_str: str) -> int:
@@ -77,6 +77,7 @@ class Game(commands.Cog):
             u.user = user_data
             u.score = str(user.score)
             u.rank = await UserDao.get_rank(user.user_id, user.guild_id)
+            u.avatar_img = await get_user_avatar_img(user.user)
             users.append(u)
 
         generated = await self.leaderboard_generator.generate_leaderboard(users)

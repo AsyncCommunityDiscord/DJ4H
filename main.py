@@ -10,8 +10,11 @@ from utils.tasks.rngdle_sync import (
 
 setup_logging()
 
+intents = discord.Intents.default()
+intents.members = True
+
 bot = discord.AutoShardedBot(
-    intents=discord.Intents.default(),
+    intents=intents,
     help_command=None,  # Disable the default help command
     debug_guilds=[DEBUG_GUILD_ID] if DEBUG_GUILD_ID else None,
 )
