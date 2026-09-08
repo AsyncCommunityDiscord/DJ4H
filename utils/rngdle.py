@@ -26,8 +26,8 @@ class UserRolls:
         self.badges = badges
 
 
-def to_user_rolls(rolls: list):
-    user_rolls = []
+def to_user_rolls(rolls: list[dict[str, int | str]]) -> list[UserRolls]:
+    user_rolls: list[UserRolls] = []
     for roll in rolls:
         number = roll["number"]
         score = roll["totalScore"]
@@ -38,7 +38,7 @@ def to_user_rolls(rolls: list):
     return user_rolls
 
 
-def to_timestamp(date):
+def to_timestamp(date: str) -> int:
     dt = datetime.fromisoformat(date.replace("Z", "+00:00"))
     timestamp = int(dt.timestamp() * 1000)
     return timestamp
@@ -70,7 +70,8 @@ def evaluate_score_to_percent_table(table: dict[str, str]) -> dict[int, float]:
 
 
 def fetch_score_to_percent_string():
-    TABLE_FILE_URL = "https://www.rngdle.com/_next/static/chunks/13342e749f60f9c2.js"
+
+    TABLE_FILE_URL = "https://www.rngdle.com/_next/static/chunks/421374ec80474347.js"
 
     js_file = requests.get(TABLE_FILE_URL).content
 
@@ -91,15 +92,21 @@ def fetch_score_to_percent_string():
     return result.group()
 
 
-def load_score_to_percent_table():
-    with open(SCORE_TO_PERCENT_PATH) as file:
+def load_score_to_percent_table() -> dict[int, float]:
+    if not SCORE_TO_PERCENT_PATH.exists():
+        return {}
+
+    with open(SCORE_TO_PERCENT_PATH, mode="r") as file:
         data_raw = file.read()
 
     parsed_table = parse_score_to_percent_table(data_raw)
     return evaluate_score_to_percent_table(parsed_table)
 
 
-def load_compressed_score_to_percent_table():
+def load_compressed_score_to_percent_table() -> dict[int, float]:
+    if not COMPRESSED_SCORE_TO_PERCENT_PATH.exists():
+        return {}
+
     with open(COMPRESSED_SCORE_TO_PERCENT_PATH, mode="r") as file:
         data = json.load(file)
     score_to_percent_table: dict[int, float] = {
@@ -118,19 +125,27 @@ def store_compressed_score_to_percent_table(new_table: dict[int, float]):
         json.dump(new_table, file)
 
 
-def update_compressed_score_to_percent_table():
+def update_compressed_score_to_percent_table() -> bool:
+    "Updates the RNGdle score->percent table. Returns whether the table has changed."
     LOGGER.info("RNGdle table sync: Start update of the score to percent table")
     score_to_percent_raw = fetch_score_to_percent_string()
     if not score_to_percent_raw:
         LOGGER.warning(
             "RNGdle: Could not fetch the score to percent table from the website, aborting the update"
         )
-        return
+        return False
     score_to_percent_parsed = parse_score_to_percent_table(score_to_percent_raw)
     score_to_percent_table = evaluate_score_to_percent_table(score_to_percent_parsed)
     compressed_score_to_percent = compress_score_to_percent(score_to_percent_table)
-    store_compressed_score_to_percent_table(compressed_score_to_percent)
-    LOGGER.info("RNGdle table sync: Successfully updated the score to percent table")
+
+    if compressed_score_to_percent != COMPRESSED_SCORE_TO_PERCENT:
+        # The table has changed
+        store_compressed_score_to_percent_table(compressed_score_to_percent)
+        LOGGER.info("RNGdle table sync: Successfully updated the score to percent table")
+        return True
+
+    LOGGER.info("RNGdle table sync: Success, no update needed for the score to percent table")
+    return False
 
 
 def compress_score_to_percent(dico: dict[int, float]) -> dict[int, float]:
@@ -261,29 +276,49 @@ def format_percent(percent: float):
 
 
 class RNGdle:
+
+    fetch_size: int = 100
+
     def __init__(self):
-        self.api_url = "https://www.rngdle.com/api/users/{}/rolls?limit=100&offset={}"
+        self.api_url: str = "https://www.rngdle.com/api/users/{}/rolls?limit={}&offset={}"
 
     def get_user_rolls(
-        self, username, previous_roll: list[UserRolls] | None = None, offset=0
+        self,
+        username: str,
+        previous_roll: list[UserRolls] | None = None,
+        offset: int = 0,
+        threshold_timestamp: int = 0,
     ) -> list[UserRolls] | None:
         if previous_roll is None:
             previous_roll = []
+            fetch_size = 10  # small fetch size for first fetches
+        else:
+            fetch_size = self.fetch_size
 
-        url = self.api_url.format(username, offset)
+        url = self.api_url.format(username, fetch_size, offset)
         response = requests.get(url)
         if response.status_code == 200:
             result = response.json()
             user_roll = to_user_rolls(result["rolls"])
-            previous_roll += user_roll
-            if result["hasMore"]:
-                return self.get_user_rolls(username, previous_roll, offset + 100)
+            previous_roll.extend(user_roll)
+            # Check if the user has more rolls that haven't been registered yet
+            if result["hasMore"] and user_roll[-1].date > threshold_timestamp:
+                return self.get_user_rolls(
+                    username,
+                    previous_roll=previous_roll,
+                    offset=offset + fetch_size,
+                    threshold_timestamp=threshold_timestamp,
+                )
             return previous_roll
         else:
             return None
 
 
 if __name__ == "__main__":
+    from config import setup_logging
+
+    setup_logging()
+
     # Perform some operations on rngdle resources to test updates mechanisms
     arg_parser = argparse.ArgumentParser()
 

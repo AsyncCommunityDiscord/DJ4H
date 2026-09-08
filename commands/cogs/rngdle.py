@@ -271,14 +271,14 @@ class RNGdle(commands.Cog):
         if not user:
             db_user = next((u for u in registered_users if u.user_id == ctx.author.id), None)
             if db_user:
-                rngdle_username = db_user.rng_username
+                rngdle_username = str(db_user.rng_username)
                 target_id = ctx.author.id
                 member = ctx.author
         elif user.startswith("<@") and user.endswith(">"):
             target_id = int(user.strip("<@!>"))
             db_user = next((u for u in registered_users if u.user_id == target_id), None)
             if db_user:
-                rngdle_username = db_user.rng_username
+                rngdle_username = str(db_user.rng_username)
                 member = ctx.guild.get_member(target_id) or await get_or_fetch_user(
                     self.bot, target_id
                 )
@@ -289,7 +289,7 @@ class RNGdle(commands.Cog):
                 None,
             )
             if db_user:
-                target_id = db_user.user_id
+                target_id = int(db_user.user_id)
                 member = ctx.guild.get_member(target_id) or await get_or_fetch_user(
                     self.bot, target_id
                 )
@@ -331,11 +331,11 @@ class RNGdle(commands.Cog):
         }
 
         for roll in rolls:
-            score = roll.score
-            num = roll.number
-            badges = roll.badge_count
+            score = int(roll.score)
+            num = int(roll.number)
+            badges = int(roll.badge_count)
 
-            rolled_date = datetime.datetime.fromtimestamp(roll.date / 1000.0)
+            rolled_date = datetime.datetime.fromtimestamp(int(roll.date) / 1000.0)
 
             total_score_sum += score
 
