@@ -6,14 +6,14 @@ authors = [
     { name = "Gamingdy" }
 ]
 readme = "README.md"
-requires-python = "~3.13"
+requires-python = "~=3.13.0"
 dependencies = [
-    "py-cord (==2.8.0)",
+    "py-cord (==2.8.1)",
     "python-dotenv (==1.2.2)",
     "pillow (==12.3.0)",
     "sqlalchemy[asyncio] (==2.0.50)",
     "aiosqlite (==0.22.1)",
-    "alembic (==1.18.5)",
+    "alembic (==1.19.1)",
     "requests (>=2.34.2,<3.0.0)",
 ]
 
@@ -22,3 +22,12 @@ package-mode = false
 
 [tool.poetry.group.dev.dependencies]
 black = "26.5.1"
+
+[tool.autopep8]
+max_line_length=100
+
+[tool.ruff]
+line-length=100
+
+[tool.black]
+line-length=100

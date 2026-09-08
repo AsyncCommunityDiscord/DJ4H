@@ -3,8 +3,10 @@ import discord
 from config import BOT_TOKEN, DEBUG_GUILD_ID, LOGGER, setup_logging
 from utils.database import init_db
 from utils.tasks.rngdle_daily_leaderboard import rngdle_daily_leaderboard_task
-from utils.tasks.rngdle_sync import rngdle_sync_task
-
+from utils.tasks.rngdle_sync import (
+    rngdle_autosync_task,
+    rngdle_score_to_percent_autoupdate_task,
+)
 
 setup_logging()
 
@@ -23,8 +25,8 @@ async def on_ready():
     LOGGER.info("Database initialized successfully.")
     LOGGER.info("------")
 
-    if not rngdle_sync_task.is_running():
-        rngdle_sync_task.start()
+    if not rngdle_autosync_task.is_running():
+        rngdle_autosync_task.start()
         LOGGER.info("RNGdle sync task started")
     else:
         LOGGER.info("RNGdle sync task already running")
@@ -34,6 +36,12 @@ async def on_ready():
         LOGGER.info("RNGdle daily leaderboard task started")
     else:
         LOGGER.info("RNGdle daily leaderboard task already running")
+
+    if not rngdle_score_to_percent_autoupdate_task.is_running():
+        rngdle_score_to_percent_autoupdate_task.start()
+        LOGGER.info("RNGdle table sync task started")
+    else:
+        LOGGER.info("RNGdle table sync task already running")
 
 
 bot.load_extensions("commands", recursive=True)

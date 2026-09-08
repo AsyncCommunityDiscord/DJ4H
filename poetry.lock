@@ -187,14 +187,14 @@ docs = ["sphinx (==8.1.3)", "sphinx-mdinclude (==0.6.2)"]
 
 [[package]]
 name = "alembic"
-version = "1.18.5"
+version = "1.19.1"
 description = "A database migration tool for SQLAlchemy."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "alembic-1.18.5-py3-none-any.whl", hash = "sha256:06d8ba9d04558022f5395e9317de03d270f3dced49cee01f89fe7a13c26f14bc"},
-    {file = "alembic-1.18.5.tar.gz", hash = "sha256:1554982221dd17e9a749b53902407578eb305e453f71999e8c7f0a48389fff8e"},
+    {file = "alembic-1.19.1-py3-none-any.whl", hash = "sha256:b39018cb3d9413a19cbd54cf3c02ad33998641f0538eb77413a488a21c3e14be"},
+    {file = "alembic-1.19.1.tar.gz", hash = "sha256:e0fca0518118c78acc493e31bcb5402f190057aaf6df8b5b95ce94c4789cf648"},
 ]
 
 [package.dependencies]
@@ -1244,14 +1244,14 @@ files = [
 
 [[package]]
 name = "py-cord"
-version = "2.8.0"
+version = "2.8.1"
 description = "A Python wrapper for the Discord API"
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 files = [
-    {file = "py_cord-2.8.0-py3-none-any.whl", hash = "sha256:24f9180b4df432ddef732e388a905aa7d9cdf8f2f26318f18a193bccb2d7f642"},
-    {file = "py_cord-2.8.0.tar.gz", hash = "sha256:57a7efefa80e7f6ef890fbfc054d686782c347c9e4d86fa7c91f7ae5285b353f"},
+    {file = "py_cord-2.8.1-py3-none-any.whl", hash = "sha256:8b97a61cceb4ca9000fc3ac1190fa4c45ef6a521d88707953f7eeadc1bd57071"},
+    {file = "py_cord-2.8.1.tar.gz", hash = "sha256:b1ebd22416941bbeccb6d26df5cbd65ff6b1d47fcbbc9652efae039e46e8a562"},
 ]
 
 [package.dependencies]
@@ -1259,9 +1259,9 @@ aiohttp = ">=3.13.2,<4.0"
 typing_extensions = ">=4.12.0,<5"
 
 [package.extras]
-docs = ["furo (==2025.12.19) ; python_version >= \"3.13\"", "levenshtein (==0.27.3) ; python_version >= \"3.13\"", "myst-parser[linkify] (==5.1.0) ; python_version >= \"3.13\"", "sphinx (==9.1.0) ; python_version >= \"3.13\"", "sphinx-autodoc-typehints (==3.10.2) ; python_version >= \"3.13\"", "sphinx-copybutton (==0.5.2) ; python_version >= \"3.13\"", "sphinx-intl (==2.3.2) ; python_version >= \"3.13\"", "sphinxcontrib-websupport (==2.0.0) ; python_version >= \"3.13\"", "sphinxcontrib_trio (==1.2.0) ; python_version >= \"3.13\"", "sphinxext-opengraph (==0.13.0) ; python_version >= \"3.13\"", "typing_extensions (==4.15.0) ; python_version >= \"3.13\""]
+docs = ["furo (==2025.12.19) ; python_version >= \"3.13\"", "levenshtein (==0.27.3) ; python_version >= \"3.13\"", "myst-parser[linkify] (==5.1.0) ; python_version >= \"3.13\"", "sphinx (==9.1.0) ; python_version >= \"3.13\"", "sphinx-autodoc-typehints (==3.12.1) ; python_version >= \"3.13\"", "sphinx-copybutton (==0.5.2) ; python_version >= \"3.13\"", "sphinx-intl (==2.3.2) ; python_version >= \"3.13\"", "sphinxcontrib-websupport (==2.0.0) ; python_version >= \"3.13\"", "sphinxcontrib_trio (==1.2.0) ; python_version >= \"3.13\"", "sphinxext-opengraph (==0.13.0) ; python_version >= \"3.13\"", "typing_extensions (==4.16.0) ; python_version >= \"3.13\""]
 speed = ["aiohttp[speedups]", "msgspec (>=0.21.0,<0.22.0)"]
-voice = ["PyNaCl (>=1.6,<1.7)", "davey (>=0.1.4,<1)"]
+voice = ["PyNaCl (>=1.6.2,<1.7)", "davey (>=0.1.4,<1)"]
 
 [[package]]
 name = "python-dotenv"
@@ -1627,5 +1627,5 @@ propcache = ">=0.2.1"
 
 [metadata]
 lock-version = "2.1"
-python-versions = "~3.13"
-content-hash = "aa2697b7159721029e066306c1eb9c3716febaae7a4cdf011aacfa690eac0f1b"
+python-versions = "~=3.13.0"
+content-hash = "1b64088224009c326b8010c2aff014f2764fe39a23d69aa309204798320871a0"

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Sequence
 
 from sqlalchemy.sql.expression import select
+from sqlalchemy import func
 
 from utils.database import RNGdle, RNGdleGuildConfig, RNGdleUser, get_db
 
@@ -49,9 +50,7 @@ class RNGdleDao:
                 return
 
             # No existing entry -> create one
-            rngdle_user = RNGdleUser(
-                user_id=user_id, guild_id=guild_id, rng_username=username
-            )
+            rngdle_user = RNGdleUser(user_id=user_id, guild_id=guild_id, rng_username=username)
             session.add(rngdle_user)
             await session.commit()
             return
@@ -76,18 +75,8 @@ class RNGdleDao:
         return None
 
     @staticmethod
-    async def upsert_rngdle(
-        user_id: int,
-        guild_id: int,
-        date: int,
-        score: int,
-        number: int,
-    ) -> bool:
-        """
-        INSERT a roll into RNGdle history if it does not already exist.
-        Returns True if inserted, False if an identical roll already exists.
-        We consider a roll identical if user_id + date + number match an existing row.
-        """
+    async def roll_exists(user_id: int, date: int, number: int) -> bool:
+        """Return whether a roll exists. Checks for user_id+date+number in the DB."""
         async for session in get_db():
             existing = await session.execute(
                 select(RNGdle).filter(
@@ -97,7 +86,26 @@ class RNGdleDao:
                 )
             )
             existing_row = existing.scalars().first()
-            if existing_row is not None:
+            return existing_row is not None
+
+        return False
+
+    @staticmethod
+    async def upsert_rngdle(
+        user_id: int,
+        guild_id: int,
+        date: int,
+        score: int,
+        number: int,
+        badges: int,
+    ) -> bool:
+        """
+        INSERT a roll into RNGdle history if it does not already exist.
+        Returns True if inserted, False if an identical roll already exists.
+        We consider a roll identical if user_id + date + number match an existing row.
+        """
+        async for session in get_db():
+            if await RNGdleDao.roll_exists(user_id, date, number):
                 return False
 
             rng = RNGdle(
@@ -106,10 +114,37 @@ class RNGdleDao:
                 date=date,
                 score=score,
                 number=number,
+                badge_count=badges,
             )
             session.add(rng)
             await session.commit()
             return True
+
+    @staticmethod
+    async def update_roll(
+        user_id: int,
+        date: int,
+        score: int,
+        number: int,
+        badges: int,
+    ) -> None:
+        """Update an existing roll searched by user_id+date+number with new score and badge count."""
+        # return
+        async for session in get_db():
+            existing = await session.execute(
+                select(RNGdle).filter(
+                    RNGdle.user_id == user_id,
+                    RNGdle.date == date,
+                    RNGdle.number == number,
+                )
+            )
+            existing_row = existing.scalars().first()
+            if existing_row is None:
+                raise ValueError("tried to update a row that doesn't exist")
+
+            existing_row.score = score
+            existing_row.badge_count = badges
+            await session.commit()
 
     @staticmethod
     async def get_today_scores(
@@ -154,9 +189,69 @@ class RNGdleDao:
 
         return None
 
+    @staticmethod
+    async def get_user_rolls(user_id: int, guild_id: int) -> Sequence[RNGdle] | None:
+        async for session in get_db():
+            query = select(RNGdle).filter(RNGdle.user_id == user_id, RNGdle.guild_id == guild_id)
+            rows = await session.execute(query)
+            return rows.scalars().all()
+        return None
+
+    @staticmethod
+    async def get_user_most_recent_roll(user_id: int, guild_id: int) -> RNGdle | None:
+        async for session in get_db():
+            most_recent_date = (
+                select(func.max(RNGdle.date))
+                .filter(RNGdle.user_id == user_id, RNGdle.guild_id == guild_id)
+                .scalar_subquery()
+            )
+            query = select(RNGdle).filter(
+                RNGdle.user_id == user_id,
+                RNGdle.guild_id == guild_id,
+                RNGdle.date == most_recent_date,
+            )
+            rows = await session.execute(query)
+            return rows.scalars().first()
+        return None
+
+    @staticmethod
+    async def get_server_rank_by_total(user_id: int, guild_id: int) -> int:
+        async for session in get_db():
+            query = (
+                select(RNGdle.user_id, func.sum(RNGdle.score).label("total_score"))
+                .filter(RNGdle.guild_id == guild_id)
+                .group_by(RNGdle.user_id)
+                .order_by(func.sum(RNGdle.score).desc())
+            )
+            rows = await session.execute(query)
+            leaderboard = rows.all()
+            for rank, row in enumerate(leaderboard, start=1):
+                if row.user_id == user_id:
+                    return rank
+        return 0
+
+    @staticmethod
+    async def get_guild_rolls(guild_id: int) -> Sequence[RNGdle] | None:
+        async for session in get_db():
+            query = select(RNGdle).filter(RNGdle.guild_id == guild_id)
+            rows = await session.execute(query)
+            return rows.scalars().all()
+        return None
+
+    @staticmethod
+    async def get_overall_leaderboard(guild_id: int):
+        async for session in get_db():
+            query = (
+                select(RNGdle.user_id, func.sum(RNGdle.score).label("total_score"))
+                .filter(RNGdle.guild_id == guild_id)
+                .group_by(RNGdle.user_id)
+                .order_by(func.sum(RNGdle.score).desc())
+            )
+            rows = await session.execute(query)
+            return rows.all()
+
 
 class RNGdleGuildConfigDao:
-
     @staticmethod
     async def set_leaderboard_channel(guild_id: int, channel_id: int | None) -> None:
         async for session in get_db():
@@ -169,9 +264,7 @@ class RNGdleGuildConfigDao:
                 config.leaderboard_channel_id = channel_id
                 session.add(config)
             else:
-                config = RNGdleGuildConfig(
-                    guild_id=guild_id, leaderboard_channel_id=channel_id
-                )
+                config = RNGdleGuildConfig(guild_id=guild_id, leaderboard_channel_id=channel_id)
                 session.add(config)
 
             await session.commit()

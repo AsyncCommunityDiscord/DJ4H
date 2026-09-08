@@ -12,7 +12,7 @@ from utils.database.dao.rngdle import (
     get_yesterday_range,
 )
 from utils.image_generator import LeaderboardGenerator, RNGdleLeaderboardUser
-from utils.number_utils import format_number
+from utils.tasks.rngdle_sync import rngdle_fetch_task
 
 
 @tasks.loop(time=time(hour=0, minute=0, tzinfo=timezone.utc))
@@ -31,6 +31,8 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
         if channel is None or not isinstance(channel, discord.TextChannel):
             continue
 
+        await rngdle_fetch_task()
+
         start_ts, end_ts = get_yesterday_range()
         scores = await RNGdleDao.get_scores_in_range(config.guild_id, start_ts, end_ts)
 
@@ -48,12 +50,10 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
 
         generator = LeaderboardGenerator()
         leaderboard_users: list[RNGdleLeaderboardUser] = []
-        for user, score, rank in zip(users, scores, range(len(users))):
-            u = RNGdleLeaderboardUser()
-            u.user = user
-            u.score = format_number(score.score)
-            u.tirage = f"{score.number:,}".replace(",", " ")
-            u.rank = rank + 1
+        for user, score_col, rank in zip(users, scores, range(len(users))):
+            score = int(score_col.score)
+            number = int(score_col.number)
+            u = RNGdleLeaderboardUser.create_user_instance(user, score, number, rank + 1)
             leaderboard_users.append(u)
 
         generated = await generator.generate_leaderboard(leaderboard_users)
@@ -63,21 +63,43 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
         file = discord.File(fp=buffer, filename="leaderboard.png")
 
         top_score = scores[0].score
-        top_users = [
-            users[i] for i, score in enumerate(scores) if score.score == top_score
-        ]
-        mentions = " ".join(u.mention for u in top_users)
+        top_users = [users[i] for i, score in enumerate(scores) if score.score == top_score]
+        mentions = " ".join(u.mention for u in top_users if u.id != 610843701861679108)
 
         await channel.send(
             content=f"🏆 Daily RNGDLE leaderboard — Félicitations à {mentions} !",
             file=file,
         )
 
-        LOGGER.info(
-            f"Daily leaderboard sent to guild {config.guild_id} ({channel.name})"
-        )
+        LOGGER.info(f"Daily leaderboard sent to guild {config.guild_id} ({channel.name})")
 
 
 @rngdle_daily_leaderboard_task.error
 async def on_daily_leaderboard_error(exc: Exception) -> None:
     LOGGER.error(f"Daily leaderboard task error: {exc}")
+
+
+if __name__ == "__main__":
+    from config import DEBUG_GUILD_ID, setup_logging, BOT_TOKEN
+    from utils.database import init_db
+
+    setup_logging()
+
+    bot = discord.AutoShardedBot(
+        intents=discord.Intents.default(),
+        help_command=None,  # Disable the default help command
+        debug_guilds=[DEBUG_GUILD_ID] if DEBUG_GUILD_ID else None,
+    )
+
+    @bot.event
+    async def on_ready():
+        LOGGER.info("Testing locally")
+        LOGGER.info("------")
+        await init_db()
+        LOGGER.info("Database initialized successfully.")
+        LOGGER.info("------")
+
+        await rngdle_daily_leaderboard_task(bot)
+        await bot.close()
+
+    bot.run(BOT_TOKEN)
