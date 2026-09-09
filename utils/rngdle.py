@@ -83,7 +83,7 @@ def fetch_score_to_percent_string():
 
     # Detect the score percentiles dict-like structure
     dict_pattern = re.compile(
-        r"{(?:(?:0x[a-fA-F0-9]+|\d+|\d+e\d+)\s*:\s*(?:\d+(?:\.\d+)?|\.\d+),?)+}"
+        r"{(?>(?>0x[a-fA-F0-9]+|\d+(?>e\d+)?)\s*:\s*(?>\d+(?>\.\d+)?|\.\d+)(?>,\s*)?)+}"
     )
     result = dict_pattern.search(str(js_file))
     if result is None:
