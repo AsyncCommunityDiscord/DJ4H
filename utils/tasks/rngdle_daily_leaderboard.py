@@ -53,7 +53,7 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
         for user, score_col, rank in zip(users, scores, range(len(users))):
             score = int(score_col.score)
             number = int(score_col.number)
-            u = RNGdleLeaderboardUser.create_user_instance(user, score, number, rank + 1)
+            u = await RNGdleLeaderboardUser.create_user_instance(user, score, number, rank + 1)
             leaderboard_users.append(u)
 
         generated = await generator.generate_leaderboard(leaderboard_users)
