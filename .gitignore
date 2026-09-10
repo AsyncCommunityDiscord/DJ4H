@@ -5,3 +5,4 @@ __pycache__
 *.env
 logs/
 dj4h.db
+ressources/rngdle/compressed_score_to_percent.json

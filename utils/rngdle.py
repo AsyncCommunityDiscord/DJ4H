@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import bisect
 import json
 import re
@@ -8,12 +9,9 @@ from datetime import datetime
 from enum import Enum
 from math import ceil, floor
 from pathlib import Path
-import re
-import typing
-import asyncio
 
-import requests
 import aiohttp
+import requests
 
 from config import LOGGER
 
@@ -76,11 +74,7 @@ def evaluate_score_to_percent_table(table: dict[str, str]) -> dict[int, float]:
 async def fetch_single_script(session, script_url: str) -> dict[str, str | int]:
     async with session.get(script_url) as response:
         data = await response.text()
-        return {
-            "url": script_url,
-            "size": len(data),
-            "content": data
-        }
+        return {"url": script_url, "size": len(data), "content": data}
 
 
 async def fetch_every_script(script_list: list[str]) -> tuple:
@@ -107,7 +101,6 @@ async def get_table_file() -> dict[str, str | int]:
     every_file = await fetch_every_script(urls)
     # The searched file is assumed to be the heaviest one 🙏
     return max(every_file, key=lambda d: d["size"])
-
 
 
 async def fetch_score_to_percent_string():
