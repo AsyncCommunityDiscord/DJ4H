@@ -132,6 +132,9 @@ async def on_rngdle_table_sync_error(exc: Exception) -> None:
     LOGGER.error(f"RNGdle table update task error: {exc}")
 
 
+RNGdle_FETCH_LOCK = asyncio.Lock()
+
+
 async def rngdle_fetch_task(*, force_full_fetch: bool = False) -> list[dict[str, int]]:
     """Fetch all registered users and sync their rolls."""
     LOGGER.info("RNGdle sync: starting pass to fetch registered users")
@@ -140,23 +143,27 @@ async def rngdle_fetch_task(*, force_full_fetch: bool = False) -> list[dict[str,
 
     rng_client = RNGdleClient()
     users = await RNGdleDao.get_all_registered_users()
-    if not users:
-        LOGGER.info("RNGdle sync: no registered users found")
-        stats = []
-    else:
-        async with asyncio.TaskGroup() as task_group:
-            tasks = [
-                task_group.create_task(
-                    _process_user(
-                        rng_client, user, log_mode="background", force_full_fetch=force_full_fetch
+
+    async with RNGdle_FETCH_LOCK:
+        if not users:
+            LOGGER.info("RNGdle sync: no registered users found")
+            stats = []
+        else:
+            async with asyncio.TaskGroup() as task_group:
+                tasks = [
+                    task_group.create_task(
+                        _process_user(
+                            rng_client,
+                            user,
+                            log_mode="background",
+                            force_full_fetch=force_full_fetch,
+                        )
                     )
-                )
-                for user in users
-            ]
-        stats = [task.result() for task in tasks]
+                    for user in users
+                ]
+            stats = [task.result() for task in tasks]
 
     LOGGER.info("RNGdle sync: pass complete")
-
     return stats
 
 
