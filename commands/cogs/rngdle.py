@@ -229,21 +229,19 @@ class RNGdle(commands.Cog):
 
         users: list[RNGdleLeaderboardUser] = []
 
-        async def add_user(score_col: RNGdleCol):
+        async def add_user(score_col: RNGdleCol, rank: int):
             user = await get_or_fetch_user(self.bot, int(score_col.user_id))
             if user is None:
                 return
 
             score = int(score_col.score)
             number = int(score_col.number)
-            u = await RNGdleLeaderboardUser.create_user_instance(
-                user, score, number, len(users) + 1
-            )
+            u = await RNGdleLeaderboardUser.create_user_instance(user, score, number, rank)
             users.append(u)
 
         async with asyncio.TaskGroup() as tg:
-            for score_col in scores:
-                tg.create_task(add_user(score_col))
+            for index, score_col in enumerate(scores):
+                tg.create_task(add_user(score_col, index + 1))
         generated = await self.leaderboard_generator.generate_leaderboard(users)
         buffer = BytesIO()
         generated.save(buffer, format="PNG")

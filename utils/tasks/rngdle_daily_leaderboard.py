@@ -50,10 +50,10 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
 
         generator = LeaderboardGenerator()
         leaderboard_users: list[RNGdleLeaderboardUser] = []
-        for user, score_col, rank in zip(users, scores, range(len(users))):
+        for index, (user, score_col) in enumerate(zip(users, scores)):
             score = int(score_col.score)
             number = int(score_col.number)
-            u = await RNGdleLeaderboardUser.create_user_instance(user, score, number, rank + 1)
+            u = await RNGdleLeaderboardUser.create_user_instance(user, score, number, index + 1)
             leaderboard_users.append(u)
 
         generated = await generator.generate_leaderboard(leaderboard_users)
@@ -64,7 +64,9 @@ async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
 
         top_score = scores[0].score
         top_users = [users[i] for i, score in enumerate(scores) if score.score == top_score]
-        mentions = " ".join(u.mention for u in top_users if u.id != 610843701861679108)
+        mentions = " ".join(
+            u.mention if u.id != 610843701861679108 else "TnTube" for u in top_users
+        )
 
         await channel.send(
             content=f"🏆 Daily RNGDLE leaderboard — Félicitations à {mentions} !",
