@@ -1,6 +1,5 @@
 from io import BytesIO
 import datetime
-import asyncio
 
 import discord
 from discord import SlashCommandGroup
@@ -301,14 +300,13 @@ class RNGdle(commands.Cog):
             )
             return
 
+        await rngdle_fetch_with_cooldown()
+
         rolls = await RNGdleDao.get_user_rolls(target_id, ctx.guild.id)
 
         if not rolls:
-            await rngdle_fetch_with_cooldown()
-            rolls = await RNGdleDao.get_user_rolls(target_id, ctx.guild.id)
-            if not rolls:
-                await ctx.respond(f"Aucun tirage trouvé pour `{rngdle_username}`!", ephemeral=True)
-                return
+            await ctx.respond(f"Aucun tirage trouvé pour `{rngdle_username}`!", ephemeral=True)
+            return
 
         total_rolls = len(rolls)
         highest_score = -1

@@ -1,5 +1,6 @@
 import argparse
 from ast import literal_eval
+import asyncio
 import bisect
 from datetime import datetime
 from enum import Enum
@@ -9,6 +10,7 @@ from pathlib import Path
 import re
 import typing
 
+import aiohttp
 import requests
 
 from config import LOGGER
@@ -287,9 +289,10 @@ class RNGdle:
     def __init__(self):
         self.api_url: str = "https://www.rngdle.com/api/users/{}/rolls?limit={}&offset={}"
 
-    def get_user_rolls(
+    async def fetch_user_rolls(
         self,
         username: str,
+        session: aiohttp.ClientSession,
         previous_roll: list[UserRolls] | None = None,
         offset: int = 0,
         threshold_timestamp: int = 0,
@@ -302,29 +305,29 @@ class RNGdle:
 
         url = self.api_url.format(username, fetch_size, offset)
         try:
-            response = requests.get(url, timeout=30)
-        except requests.exceptions.Timeout as e:
-            LOGGER.warning(f"RNGdle fetch rolls: Got err {e}")
+            async with session.get(url, timeout=30) as response:
+                if response.status == 200:
+                    result = await response.json()
+                else:
+                    return None
+        except asyncio.TimeoutError:
             LOGGER.warning(
                 f"RNGdle fetch rolls: Fetching user {username:20} with fetch size {fetch_size} timed out"
             )
             return None
 
-        if response.status_code == 200:
-            result = response.json()
-            user_roll = to_user_rolls(result["rolls"])
-            previous_roll.extend(user_roll)
-            # Check if the user has more rolls that haven't been registered yet
-            if result["hasMore"] and user_roll[-1].date > threshold_timestamp:
-                return self.get_user_rolls(
-                    username,
-                    previous_roll=previous_roll,
-                    offset=offset + fetch_size,
-                    threshold_timestamp=threshold_timestamp,
-                )
-            return previous_roll
-        else:
-            return None
+        user_roll = to_user_rolls(result["rolls"])
+        previous_roll.extend(user_roll)
+        # Check if the user has more rolls that haven't been registered yet
+        if result["hasMore"] and user_roll[-1].date > threshold_timestamp:
+            return await self.fetch_user_rolls(
+                username,
+                session,
+                previous_roll=previous_roll,
+                offset=offset + fetch_size,
+                threshold_timestamp=threshold_timestamp,
+            )
+        return previous_roll
 
 
 if __name__ == "__main__":
