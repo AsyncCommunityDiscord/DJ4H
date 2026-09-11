@@ -73,7 +73,7 @@ def evaluate_score_to_percent_table(table: dict[str, str]) -> dict[int, float]:
 
 def fetch_score_to_percent_string():
 
-    TABLE_FILE_URL = "https://www.rngdle.com/_next/static/chunks/421374ec80474347.js"
+    TABLE_FILE_URL = "https://www.rngdle.com/_next/static/chunks/1ff01b430aea6d14.js"
 
     try:
         response = requests.get(TABLE_FILE_URL, timeout=20)
