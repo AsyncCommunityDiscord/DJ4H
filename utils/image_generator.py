@@ -59,7 +59,7 @@ class RNGdleLeaderboardUser(LeaderboardUser):
         new_user = cls()
         new_user.user = user
         new_user.score = format_number(score)
-        new_user.avatar_img = await get_user_avatar_img(user)
+        new_user.avatar_img = await fetch_base_avatar(user)
         new_user.tirage = f"{number:,}".replace(",", " ")
         new_user.rank = rank
         new_user.tier = get_score_tier(score)
@@ -756,15 +756,6 @@ class ServerStatGenerator:
 
         draw.text((170, 45), "RNGdle - Server Stats", fill=self.TEXT_COLOR, font=self.font_title)
 
-        async def fetch_avatar(member, size):
-            if member:
-                try:
-                    data = await member.display_avatar.read()
-                    return Image.open(BytesIO(data)).resize((size, size)).convert("RGBA")
-                except:
-                    pass
-            return Image.new("RGBA", (size, size), (120, 120, 120, 255))
-
         best_avatar = await fetch_avatar(stats["best_roll"].get("member"), 32)
         worst_avatar = await fetch_avatar(stats["worst_roll"].get("member"), 32)
 
@@ -1131,5 +1122,20 @@ class OverallLeaderboardGenerator:
         img.paste(avatar_img, (avatar_x, avatar_y), avatar_img)
 
 
-async def get_user_avatar_img(user: discord.User) -> Image.Image:
+async def fetch_base_avatar(user: discord.User) -> Image.Image:
     return Image.open(BytesIO(await user.display_avatar.read()))
+
+
+async def fetch_avatar(member: discord.User, size: int) -> Image.Image:
+    if member:
+        try:
+            base_avatar = await fetch_base_avatar(member)
+            return base_avatar.resize((size, size)).convert("RGBA")
+        except (discord.DiscordException, discord.HTTPException, discord.NotFound):
+            LOGGER.warning(f"Could not fetch avatar for member {member.name} (id {member.id})")
+        except Exception:
+            LOGGER.warning(
+                f"Failed to create avatar image for member {member.name} (id {member.id})"
+            )
+
+    return Image.new("RGBA", (size, size), (120, 120, 120, 255))
