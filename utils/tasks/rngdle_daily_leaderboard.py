@@ -15,7 +15,8 @@ from utils.image_generator import LeaderboardGenerator, RNGdleLeaderboardUser
 from utils.tasks.rngdle_sync import rngdle_fetch_task
 
 
-@tasks.loop(time=time(hour=0, minute=0, tzinfo=timezone.utc))
+# Task runs at 1AM UTC because rngdle.com is unavailable around 0AM
+@tasks.loop(time=time(hour=1, minute=0, tzinfo=timezone.utc))
 async def rngdle_daily_leaderboard_task(bot: discord.Bot) -> None:
     configs = await RNGdleGuildConfigDao.get_all_configured_guilds()
 

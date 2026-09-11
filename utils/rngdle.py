@@ -73,11 +73,16 @@ def fetch_score_to_percent_string():
 
     TABLE_FILE_URL = "https://www.rngdle.com/_next/static/chunks/421374ec80474347.js"
 
-    js_file = requests.get(TABLE_FILE_URL).content
+    try:
+        response = requests.get(TABLE_FILE_URL, timeout=20)
+    except requests.exceptions.Timeout as e:
+        LOGGER.warning(f"RNGdle table fetch: fetching the table timed out, got err {e}")
+        return ""
 
+    js_file = response.content
     if len(js_file) < 100_000:
         LOGGER.warning(
-            f"RNGdle: The file *seems* too small to contain the score to percent table ({len(js_file)} < 100 KB)"
+            f"RNGdle table fetch: The file *seems* too small to contain the score to percent table ({len(js_file)} < 100 KB)"
         )
         return ""
 
@@ -296,7 +301,15 @@ class RNGdle:
             fetch_size = self.fetch_size
 
         url = self.api_url.format(username, fetch_size, offset)
-        response = requests.get(url)
+        try:
+            response = requests.get(url, timeout=30)
+        except requests.exceptions.Timeout as e:
+            LOGGER.warning(f"RNGdle fetch rolls: Got err {e}")
+            LOGGER.warning(
+                f"RNGdle fetch rolls: Fetching user {username:20} with fetch size {fetch_size} timed out"
+            )
+            return None
+
         if response.status_code == 200:
             result = response.json()
             user_roll = to_user_rolls(result["rolls"])
