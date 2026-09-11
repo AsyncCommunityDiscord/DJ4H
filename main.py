@@ -7,6 +7,7 @@ from utils.tasks.rngdle_sync import (
     rngdle_autosync_task,
     rngdle_score_to_percent_autoupdate_task,
 )
+from utils.tasks.users_cache_update import init_user_cache, user_cache_sync_task
 
 setup_logging()
 
@@ -45,6 +46,13 @@ async def on_ready():
         LOGGER.info("RNGdle table sync task started")
     else:
         LOGGER.info("RNGdle table sync task already running")
+
+    await init_user_cache()
+    if not user_cache_sync_task.is_running():
+        user_cache_sync_task.start(bot)
+        LOGGER.info("Users cache sync task started")
+    else:
+        LOGGER.info("Users cache sync task already running")
 
 
 bot.load_extensions("commands", recursive=True)

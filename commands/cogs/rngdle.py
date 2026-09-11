@@ -7,7 +7,6 @@ from discord import SlashCommandGroup
 from discord.ext import commands
 
 from config import LOGGER, MAGIC_COLOR
-from utils import get_or_fetch_user
 from utils.database.dao.rngdle import RNGdleDao, RNGdleGuildConfigDao
 from utils.database.schema import RNGdle as RNGdleCol
 from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
@@ -20,7 +19,7 @@ from utils.image_generator import (
 )
 from utils.rngdle import RNGdle as RNGdleAPI
 from utils.rngdle import get_score_tier
-from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
+from utils.tasks.users_cache_update import get_or_fetch_user
 
 
 class LeaderboardPaginator(discord.ui.View):
@@ -588,5 +587,5 @@ class RNGdle(commands.Cog):
         await ctx.respond(file=file, view=view)
 
 
-def setup(bot):
+def setup(bot: discord.Bot):
     bot.add_cog(RNGdle(bot))
