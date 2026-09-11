@@ -170,6 +170,12 @@ class RNGdleDao:
         return None
 
     @staticmethod
+    async def clear_rolls():
+        async for session in get_db():
+            await session.execute(delete(RNGdle))
+            await session.commit()
+
+    @staticmethod
     async def get_scores_in_range(
         guild_id: int, start_ts: int, end_ts: int
     ) -> Sequence[RNGdle] | None:

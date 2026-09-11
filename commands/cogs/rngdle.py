@@ -1,25 +1,25 @@
-from io import BytesIO
 import datetime
-import asyncio
+from io import BytesIO
 
 import discord
 from discord import SlashCommandGroup
 from discord.ext import commands
 
-from config import MAGIC_COLOR
+from config import LOGGER, MAGIC_COLOR
 from utils import get_or_fetch_user
 from utils.database.dao.rngdle import RNGdleDao, RNGdleGuildConfigDao
 from utils.database.schema import RNGdle as RNGdleCol
 from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
 from utils.image_generator import (
     LeaderboardGenerator,
-    RNGdleLeaderboardUser,
-    ProfileGenerator,
-    ServerStatGenerator,
     OverallLeaderboardGenerator,
+    ProfileGenerator,
+    RNGdleLeaderboardUser,
+    ServerStatGenerator,
 )
 from utils.rngdle import RNGdle as RNGdleAPI
 from utils.rngdle import get_score_tier
+from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
 
 
 class LeaderboardPaginator(discord.ui.View):
@@ -210,6 +210,19 @@ class RNGdle(commands.Cog):
                 description=description,
             )
 
+        await ctx.respond(embed=message)
+
+    @rngdle_admin.command(description="Clear RNGDLE score")
+    @discord.default_permissions(administrator=True)
+    async def clear(self, ctx: discord.ApplicationContext) -> None:
+        await ctx.defer()
+        await RNGdleDao.clear_rolls()
+        message = discord.Embed(
+            title="RNGdle Clear",
+            color=discord.Colour(MAGIC_COLOR),
+            description="All RNGDLE rolls have been cleared from the database.",
+        )
+        LOGGER.info(f"RNGDLE rolls cleared by {ctx.author} in guild {ctx.guild.id}")
         await ctx.respond(embed=message)
 
     @rng_group.command(description="Show RNGDLE leaderboard")
