@@ -129,7 +129,6 @@ class RNGdleDao:
         badges: int,
     ) -> None:
         """Update an existing roll searched by user_id+date+number with new score and badge count."""
-        # return
         async for session in get_db():
             existing = await session.execute(
                 select(RNGdle).filter(

@@ -1,13 +1,15 @@
 import datetime
 from io import BytesIO
+import asyncio
 
 import discord
 from discord import SlashCommandGroup
 from discord.ext import commands
 
 from config import LOGGER, MAGIC_COLOR
-from utils import get_or_fetch_user
 from utils.database.dao.rngdle import RNGdleDao, RNGdleGuildConfigDao
+from utils.database.schema import RNGdle as RNGdleCol
+from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
 from utils.image_generator import (
     LeaderboardGenerator,
     OverallLeaderboardGenerator,
@@ -17,7 +19,7 @@ from utils.image_generator import (
 )
 from utils.rngdle import RNGdle as RNGdleAPI
 from utils.rngdle import get_score_tier
-from utils.tasks.rngdle_sync import rngdle_fetch_with_cooldown, sync_guild_users
+from utils.tasks.users_cache_update import get_or_fetch_user
 
 
 class LeaderboardPaginator(discord.ui.View):
@@ -239,16 +241,20 @@ class RNGdle(commands.Cog):
             return
 
         users: list[RNGdleLeaderboardUser] = []
-        for score_col in scores:
-            user = await get_or_fetch_user(self.bot, score_col.user_id)
+
+        async def add_user(score_col: RNGdleCol, rank: int):
+            user = await get_or_fetch_user(self.bot, int(score_col.user_id))
             if user is None:
-                continue
+                return
 
             score = int(score_col.score)
             number = int(score_col.number)
-            u = RNGdleLeaderboardUser.create_user_instance(user, score, number, len(users) + 1)
+            u = await RNGdleLeaderboardUser.create_user_instance(user, score, number, rank)
             users.append(u)
 
+        async with asyncio.TaskGroup() as tg:
+            for index, score_col in enumerate(scores):
+                tg.create_task(add_user(score_col, index + 1))
         generated = await self.leaderboard_generator.generate_leaderboard(users)
         buffer = BytesIO()
         generated.save(buffer, format="PNG")
@@ -581,5 +587,5 @@ class RNGdle(commands.Cog):
         await ctx.respond(file=file, view=view)
 
 
-def setup(bot):
+def setup(bot: discord.Bot):
     bot.add_cog(RNGdle(bot))
